@@ -1,11 +1,18 @@
 import bcrypt
 from sqlalchemy.orm import Session
-from models import LawyerModel
+from models import *
 from pydantic_sqlalchemy import sqlalchemy_to_pydantic
-from datetime import datetime 
+from datetime import datetime , timedelta
+from jose import JWTError , jwt
+from fastapi.responses import JSONResponse
+
+
+
+
+
+
+
 LawyerCreateResponse = sqlalchemy_to_pydantic(LawyerModel, exclude=['id','password'])
-
-
 def hash_password(password: str):
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
@@ -13,27 +20,19 @@ def hash_password(password: str):
 
 def create_lawyer_account(
     db: Session,
-    fullname: str,
-    email: str,
-    languages: str,
-    gendre: str,
-    phone_number: str,
-    address: str,
-    city: str,
-    description: str,
-    password : str
+    lawyer_data : LawyerCreate
 ) -> LawyerCreateResponse:
     # Create a new lawyer instance
-    hashed_password = hash_password(password)
+    hashed_password = hash_password(lawyer_data.password)
     new_lawyer = LawyerModel(
-        fullname=fullname,
-        email=email,
-        languages=languages,
-        gendre=gendre,
-        phone_number=phone_number,
-        address=address,
-        city=city,
-        description=description,
+        fullname=lawyer_data.fullname,
+        email=lawyer_data.email,
+        languages=lawyer_data.languages,
+        gendre=lawyer_data.gendre,
+        phone_number=lawyer_data.phone_number,
+        address=lawyer_data.address,
+        city=lawyer_data.city,
+        description=lawyer_data.description,
         password = hashed_password
     )
 
@@ -49,29 +48,26 @@ def get_lawyer_by_email(db: Session, email: str) -> LawyerCreateResponse:
     return LawyerCreateResponse.from_orm(lawyer) if lawyer else None
 
 
+def det_lawyers (db :Session):
+    lawyerrs = db.query(LawyerModel).all()
+    return JSONResponse(content =lawyers)
+
 def update_lawyer(
     db: Session,
-    lawyer_id: int,
-    fullname: str,
-    email: str,
-    languages: str,
-    gendre: str,
-    phone_number: str,
-    address: str,
-    city: str,
-    description: str
+    lawyer_id : int,
+    lawyer_data : LawyerModel
 ) -> LawyerCreateResponse:
     # Check if the lawyer with the specified ID exists
     existing_lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
     # Update the lawyer's information
-    existing_lawyer.fullname = fullname
-    existing_lawyer.email = email
-    existing_lawyer.languages = languages
-    existing_lawyer.gendre = gendre
-    existing_lawyer.phone_number = phone_number
-    existing_lawyer.address = address
-    existing_lawyer.city = city
-    existing_lawyer.description = description
+    existing_lawyer.fullname =  lawyer_data.fullname
+    existing_lawyer.email = lawyer_data.email
+    existing_lawyer.languages = lawyer_data.languages
+    existing_lawyer.gendre = lawyer_data.gendre
+    existing_lawyer.phone_number = lawyer_data.phone_number
+    existing_lawyer.address = lawyer_data.address
+    existing_lawyer.city = lawyer_data.city
+    existing_lawyer.description = lawyer_data.description
     existing_lawyer.updated_at = datetime.utcnow()
 
     # Commit the changes to the database
@@ -88,3 +84,7 @@ def delete_lawyer(db: Session, lawyer_id: int):
     db.delete(existing_lawyer)
     db.commit()
     return existing_lawyer
+
+
+def lawyer_login_controller(db:Session):
+    return None

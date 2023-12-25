@@ -3,7 +3,7 @@ from sqlalchemy import  Column, Integer, String, Date, DateTime
 from datetime import datetime 
 from database import engine
 from sqlalchemy.orm import relationship
-
+from pydantic import BaseModel , EmailStr
 
 Base = declarative_base()
 class LawyerModel(Base):
@@ -23,3 +23,25 @@ class LawyerModel(Base):
     updated_at = Column(DateTime, default=datetime.utcnow)
     
 Base.metadata.create_all(engine)
+
+class LawyerCreate(BaseModel):
+    fullname: str
+    email: EmailStr
+    languages: str
+    gendre: str
+    phone_number: str
+    address: str
+    city: str
+    description: str
+    password : str
+
+class LawyerUpdate(BaseModel):
+    fullname: str
+    email: EmailStr
+    languages: str
+    gendre: str
+    phone_number: str
+    address: str
+    city: str
+    description: str
+    password : str

@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String,DateTime
 from database import engine
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
-
+from pydantic import BaseModel
 from sqlalchemy.orm import relationship
 
 
@@ -19,3 +19,14 @@ class UserModel(Base):
 
 
 Base.metadata.create_all(engine)
+
+class UserCreate(BaseModel):
+    fullname: str
+    email: str
+    password: str
+
+
+class UserUpdate(BaseModel):
+    fullname: str
+    email: str
+    password: str

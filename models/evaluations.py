@@ -3,9 +3,9 @@ from sqlalchemy import create_engine, Column, Integer, String, Date, DateTime, S
 from database import engine
 from models.user import  UserModel
 from models.lawyer import LawyerModel
-
+from datetime import datetime
 from sqlalchemy.orm import relationship
-
+from pydantic import BaseModel  
 
 
 
@@ -21,3 +21,16 @@ class EvaluationModel(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
 Base.metadata.create_all(engine)
+
+class EvaluationCreate(BaseModel):
+    commentaire: str
+    rating: int
+    publication_date: datetime
+    user_id: int
+    lawyer_id: int
+class EvaluationUpdate(BaseModel):
+    commentaire: str
+    rating: int
+    publication_date: datetime
+    user_id: int
+    lawyer_id: int
