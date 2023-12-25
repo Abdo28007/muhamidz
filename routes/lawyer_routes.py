@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from controllers.lawyer_controller import create_lawyer_account , get_lawyer_by_email, update_lawyer
+from controllers.lawyer_controller import *
 from database import SessionLocal  
 from models.lawyer import LawyerModel
 
@@ -90,3 +90,11 @@ def update_lawyer_account(
     
     return {"message": "account updated succesfully",
     "new account" : updated_lawyer}
+
+@lawyer_route.delete("/lawyers/{lawyer_id}/delete")
+def delete_lawyer_account(lawyer_id: int, db: Session = Depends(get_db)):
+    existing_lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
+    if not existing_lawyer:
+        return {"message":"Lawyer not found"}
+    deleted_lawyer = delete_lawyer(db, lawyer_id)
+    return {"message": "account deleted succesfully"}

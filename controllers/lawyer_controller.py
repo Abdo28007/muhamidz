@@ -63,7 +63,6 @@ def update_lawyer(
 ) -> LawyerCreateResponse:
     # Check if the lawyer with the specified ID exists
     existing_lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
-
     # Update the lawyer's information
     existing_lawyer.fullname = fullname
     existing_lawyer.email = email
@@ -80,3 +79,12 @@ def update_lawyer(
     db.refresh(existing_lawyer)
 
     return LawyerCreateResponse.from_orm(existing_lawyer)
+
+
+def delete_lawyer(db: Session, lawyer_id: int):
+    # Check if the user with the specified ID exists
+    existing_lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
+    # Delete the user from the database
+    db.delete(existing_lawyer)
+    db.commit()
+    return existing_lawyer

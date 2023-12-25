@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from controllers.user_controller import create_user_account ,get_users , get_user_by_email,update_user
+from controllers.user_controller import *
 from database import SessionLocal  
 from models.user import UserModel
 
@@ -53,3 +53,12 @@ def update_lawyer_account(
     
     return {"message": "account updated succesfully",
     "updated account" : updated_user}
+
+
+@user_route.delete("/users/{user_id}/delete")
+def delete_user_account(user_id: int, db: Session = Depends(get_db)):
+    existing_user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not existing_user:
+        return {"message":"user account not found"}
+    deleted_user = delete_user(db, user_id)
+    return {"message": "account deleted succesfully"}

@@ -44,3 +44,11 @@ def update_user (
     db.commit()
     db.refresh(existing_user)
     return UserUpdateResponse.from_orm(existing_user) 
+
+def delete_user(db: Session, user_id: int):
+    # Check if the user with the specified ID exists
+    existing_user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    # Delete the user from the database
+    db.delete(existing_user)
+    db.commit()
+    return existing_user
