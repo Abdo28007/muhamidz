@@ -1,11 +1,9 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine, Column, Integer, String, Date, DateTime, Sequence, ForeignKey, func,Boolean
-from database import engine
+from sqlalchemy import  Column, Integer, String, DateTime, ForeignKey,Boolean
 from sqlalchemy.orm import relationship
 
 
-from models import UserModel as users
-from models import LawyerModel as lawyers
+from database import engine
 
 
 
@@ -18,8 +16,7 @@ class AppointmentModel(Base):
     accepted = Column(Boolean, default=False)
 
 
-
+Base.metadata.create_all(engine)
 
 
     
-Base.metadata.create_all(engine)

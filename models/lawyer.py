@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import  Column, Integer, String, Date, DateTime,Sequence
+from sqlalchemy import  Column, Integer, String, Date, DateTime
 from datetime import datetime 
 from database import engine
 from sqlalchemy.orm import relationship
@@ -9,7 +9,7 @@ Base = declarative_base()
 class LawyerModel(Base):
     __tablename__ = "lawyers"
 
-    id = Column(Integer, Sequence("lawyer_id_seq"), primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     fullname = Column(String(255), index=True)
     email = Column(String(50), unique=True, index=True)
     languages= Column(String(255))
@@ -22,5 +22,4 @@ class LawyerModel(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
     
-
 Base.metadata.create_all(engine)
