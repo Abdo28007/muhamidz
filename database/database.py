@@ -16,3 +16,6 @@ def get_db():
     finally:
         db.close()
 
+
+
+Base.metadata.create_all(engine)

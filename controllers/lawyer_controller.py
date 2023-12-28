@@ -1,6 +1,8 @@
 import bcrypt
 from sqlalchemy.orm import Session
 from models import *
+from controllers import *
+from fastapi import Depends
 from pydantic_sqlalchemy import sqlalchemy_to_pydantic
 from datetime import datetime , timedelta
 from jose import JWTError , jwt
@@ -13,10 +15,10 @@ from fastapi.responses import JSONResponse
 
 
 LawyerCreateResponse = sqlalchemy_to_pydantic(LawyerModel, exclude=['id','password'])
-def hash_password(password: str):
-    salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed_password.decode('utf-8')
+
+
+
+
 
 def create_lawyer_account(
     db: Session,
@@ -43,22 +45,38 @@ def create_lawyer_account(
 
     return LawyerCreateResponse.from_orm(new_lawyer)
 
+
+
+
+def send_email_verification():
+    pass
+
+
+
+ 
 def get_lawyer_by_email(db: Session, email: str) -> LawyerCreateResponse:
     lawyer = db.query(LawyerModel).filter(LawyerModel.email == email).first()
     return LawyerCreateResponse.from_orm(lawyer) if lawyer else None
+
+
 
 
 def det_lawyers (db :Session):
     lawyerrs = db.query(LawyerModel).all()
     return JSONResponse(content =lawyers)
 
+
+
+
 def update_lawyer(
     db: Session,
     lawyer_id : int,
-    lawyer_data : LawyerModel
+    lawyer_data : LawyerCreate = Depends(get_current_lawyer)
 ) -> LawyerCreateResponse:
     # Check if the lawyer with the specified ID exists
     existing_lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
+    if existing_lawyer.id != lawyer_id:
+        raise HTTPException(status_code=404, detail="Unotherized")
     # Update the lawyer's information
     existing_lawyer.fullname =  lawyer_data.fullname
     existing_lawyer.email = lawyer_data.email
@@ -77,6 +95,8 @@ def update_lawyer(
     return LawyerCreateResponse.from_orm(existing_lawyer)
 
 
+
+
 def delete_lawyer(db: Session, lawyer_id: int):
     # Check if the user with the specified ID exists
     existing_lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
@@ -86,5 +106,29 @@ def delete_lawyer(db: Session, lawyer_id: int):
     return existing_lawyer
 
 
-def lawyer_login_controller(db:Session):
-    return None
+
+
+def get_lawyer_rating(db :Session,lawyer_id :int ):
+    lawyerrating = db.query(EvaluationModel).filter(EvaluationModel.lawyer_id== lawyer_id).all()
+    total = 0
+    counter = 0
+    for evaluation in lawyerrating:
+        total += evaluation.rating
+        counter += 1
+    total = total/counter
+    return total
+
+
+
+
+def get_all_avis_for_lawyer(db : Session,lawyer_id):
+    avis = db.query(EvaluationModel).filter(EvaluationModel.lawyer_id==lawyer_id).all()
+    result = []
+    for avi in avis:
+        data={}
+        user = get_user_by_id(db ,avi.user_id)
+        data["user"] = user.fullname
+        data['rating'] = avi.rating
+        data['commentaire'] = avi.commentaire
+        result.append(data)
+    return result
