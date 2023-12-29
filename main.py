@@ -11,4 +11,4 @@ app.include_router(lawyer_routes)
 app.include_router(time_availability_routes)
 app.include_router(appointments_routes)
 
-models.Base.metadata.create_all(bind = engine)
+# models.Base.metadata.create_all(bind = engine)
