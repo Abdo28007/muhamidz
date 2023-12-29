@@ -1,7 +1,8 @@
-from pydantic import BaseModel , EmailStr
+from pydantic import BaseModel , EmailStr 
 
 from datetime import datetime
 
+from typing import List
 
 class UserCreate(BaseModel):
     fullname: str 
@@ -30,9 +31,14 @@ class LawyerCreate(BaseModel):
     city: str
     description: str
     password : str
+    class Config:
+        orm_mode = True
+        from_orm = True
 
 
 class EvaluationCreate(BaseModel):
     commentaire: str
     rating: int
 
+class EmailSchema(BaseModel):
+    email: List[EmailStr]

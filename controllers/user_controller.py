@@ -1,15 +1,13 @@
-# controllers/user_controller.py
-from sqlalchemy.orm import Session
-from models import *
-from controllers.auth_controller import *
-import bcrypt
-from datetime import datetime
-from fastapi.responses import JSONResponse
-from pydantic_sqlalchemy import sqlalchemy_to_pydantic
-UserUpdateResponse = sqlalchemy_to_pydantic(UserModel, exclude=['id','password'])
 from fastapi import Depends , File , UploadFile
 
-
+from sqlalchemy.orm import Session
+import bcrypt
+from fastapi.responses import JSONResponse
+from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
+from controllers.auth_controller import *
+from models import *
+from dotenv import   dotenv_values
+config = dotenv_values('.env')
 
 
 
@@ -23,19 +21,13 @@ def create_user_account(db: Session,user_data : UserCreate):
     return db_user
 
 
-
-
 def get_users(db : Session):
     users = db.query(UserModel).all()
     return  JSONResponse(content =users)
 
 
-
-
-
 def get_user_by_email(db: Session, email: str):
     return db.query(UserModel).filter(UserModel.email == email).first()
-
 
 
 
@@ -48,7 +40,7 @@ def update_user (
     db: Session,
     user_id :int,
     user_data :UserCreate 
-)-> UserUpdateResponse :
+):
     # Check if the user with the specified ID exists
     existing_user = db.query(UserModel).filter(UserModel.id ==user_id).first()
     # Update the lawyer's information
@@ -58,10 +50,7 @@ def update_user (
     # Commit the changes to the database
     db.commit()
     db.refresh(existing_user)
-    return UserUpdateResponse.from_orm(existing_user) 
-
-
-
+    return existing_user
 
 
 def delete_user(db: Session, 
@@ -79,6 +68,18 @@ def delete_user(db: Session,
     db.delete(existing_user)
     db.commit()
     return existing_user
+
+
+
+
+
+
+
+def google_auth():
+    pass
+
+
+
 
 def user_rate(
         db :Session,

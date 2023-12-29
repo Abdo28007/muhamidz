@@ -3,27 +3,18 @@ from sqlalchemy.orm import Session
 from models import *
 from controllers import *
 from fastapi import Depends
-from pydantic_sqlalchemy import sqlalchemy_to_pydantic
 from datetime import datetime , timedelta
 from jose import JWTError , jwt
 from fastapi.responses import JSONResponse
-
-
-
-
-
-
-
-LawyerCreateResponse = sqlalchemy_to_pydantic(LawyerModel, exclude=['id','password'])
-
-
+from fastapi_mail import ConnectionConfig , FastMail , MessageSchema ,MessageType
+from dotenv import   dotenv_values
+config = dotenv_values('.env')
 
 
 
 def create_lawyer_account(
     db: Session,
-    lawyer_data : LawyerCreate
-) -> LawyerCreateResponse:
+    lawyer_data : LawyerCreate):
     # Create a new lawyer instance
     hashed_password = hash_password(lawyer_data.password)
     new_lawyer = LawyerModel(
@@ -43,41 +34,67 @@ def create_lawyer_account(
     db.commit()
     db.refresh(new_lawyer)
 
-    return LawyerCreateResponse.from_orm(new_lawyer)
+    return new_lawyer
 
 
 
-
-def send_email_verification():
-    pass
-
+async def send_lawyer_email_verification(db : Session, lawyer_id : int):
+    expiration_time = datetime.utcnow() + timedelta(minutes=5)
+    lawyer =  db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
+    lawyer_email = lawyer.email
+    expiration_time = datetime.utcnow() + timedelta(minutes=2)
+    token =  jwt.encode(
+        {
+         "lawyer_id" : lawyer.id,
+         "expired_in": expiration_time.timestamp()},
+        config['SECRET_KEY'],
+        algorithm=config['ALGORITHM'],
+    )
+    print(token)
+    link = f"http://localhost:8000/{lawyer_id}/verify-email/{token}"
+    html = f"""
+            <p>Click here to verify your account </p>
+            <center>
+                <a href="{link}">
+                    <button style="background-color: blue; color: white; padding: 10px 20px; border-radius: 5px; font-size: 16px;">Click Here</button>
+                </a>
+            </center>
+        """
+    conf = ConnectionConfig(
+            MAIL_USERNAME = config['GMAIL'],
+            MAIL_PASSWORD =  config['GMAIL_SECRET'],
+            MAIL_FROM = config['GMAIL'],
+            MAIL_PORT = 587,
+            MAIL_SERVER = "smtp.gmail.com",
+            MAIL_STARTTLS = False,
+            MAIL_SSL_TLS = True,
+            USE_CREDENTIALS = True,
+            VALIDATE_CERTS = True
+        )
+    message = MessageSchema(
+            subject="Fastapi-Mail module",
+            recipients=[lawyer.email],
+            body=html,
+            subtype=MessageType.html
+            )
+    fm = FastMail(conf)
+    try:
+        await fm.send_message(message)
+        return {"message": "Email sent successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
  
-def get_lawyer_by_email(db: Session, email: str) -> LawyerCreateResponse:
-    lawyer = db.query(LawyerModel).filter(LawyerModel.email == email).first()
-    return LawyerCreateResponse.from_orm(lawyer) if lawyer else None
-
-
-
-
-def det_lawyers (db :Session):
-    lawyerrs = db.query(LawyerModel).all()
-    return JSONResponse(content =lawyers)
-
-
 
 
 def update_lawyer(
     db: Session,
     lawyer_id : int,
-    lawyer_data : LawyerCreate = Depends(get_current_lawyer)
-) -> LawyerCreateResponse:
-    # Check if the lawyer with the specified ID exists
+    lawyer_data : LawyerCreate = Depends(get_current_user)) :
     existing_lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
-    if existing_lawyer.id != lawyer_id:
+    if lawyer_data.id != lawyer_id:
         raise HTTPException(status_code=404, detail="Unotherized")
-    # Update the lawyer's information
     existing_lawyer.fullname =  lawyer_data.fullname
     existing_lawyer.email = lawyer_data.email
     existing_lawyer.languages = lawyer_data.languages
@@ -87,20 +104,17 @@ def update_lawyer(
     existing_lawyer.city = lawyer_data.city
     existing_lawyer.description = lawyer_data.description
     existing_lawyer.updated_at = datetime.utcnow()
-
-    # Commit the changes to the database
     db.commit()
     db.refresh(existing_lawyer)
-
-    return LawyerCreateResponse.from_orm(existing_lawyer)
-
+    return existing_lawyer
 
 
 
-def delete_lawyer(db: Session, lawyer_id: int):
-    # Check if the user with the specified ID exists
+
+def delete_lawyer(db: Session,lawyer_id: int,lawyer_data : LawyerCreate = Depends(get_current_user) ):
     existing_lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
-    # Delete the user from the database
+    if lawyer_data.id != lawyer_id:
+        raise HTTPException(status_code=404, detail="Unotherized")
     db.delete(existing_lawyer)
     db.commit()
     return existing_lawyer
@@ -117,6 +131,9 @@ def get_lawyer_rating(db :Session,lawyer_id :int ):
         counter += 1
     total = total/counter
     return total
+
+
+
 
 
 

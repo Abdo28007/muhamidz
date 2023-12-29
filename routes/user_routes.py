@@ -2,19 +2,18 @@ from fastapi import APIRouter, Depends, HTTPException , Response
 from sqlalchemy.orm import Session
 import bcrypt
 from datetime import datetime
-
-
 from database import get_db 
 from models import *
 from controllers import *
-
-        
+from dotenv import   dotenv_values
+config = dotenv_values('.env')
 
 
 user_route = APIRouter() 
 @user_route.get("/users")
-async def get_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    users = db.query(UserModel).offset(skip).limit(limit).all()
+async def get_all_users( db: Session = Depends(get_db)):
+    users = db.query(UserModel).all()
+    
     return users
 
 
@@ -25,20 +24,10 @@ async def create_user_account_route(user_data :UserCreate , db: Session = Depend
     if existing_user:
         raise HTTPException(status_code=400, detail="account already exicte log in please")
     user =  create_user_account(db, user_data = user_data)
-    return {"message": "user created succesfully",
+    user_id = user.id
+    result = await send_user_email_verification(db , user_id)   
+    return {"message": "user created succesfully , check ur email to verify ur account",
             "user": user}
-
-
-
-
-@user_route.get('/users/get_par_email')
-async def get_user_account(email : str , db: Session = Depends(get_db)):
-    existing_user=  get_user_by_email(db , email = email)
-    if(existing_user):
-        return {"message ": "account found",
-        "user" : existing_user}
-    else:
-        return {"message ": "account not found"}
 
 
 
@@ -82,13 +71,13 @@ def delete_user_account(user_id: int,
 
 
 
-@user_route.post("/user-login")
-async def login_for_access_token(user_info: LoginData  , db : Session = Depends(get_db)):
-    # Authenticate the user against the database
-    access_token = await authenticate_user(user_info.email,user_info.password,db)
-    #response = Response()
-    #response.set_cookie(key="access_token", value=access_token, httponly=True)
-    return {"acces token " : access_token }
+
+
+
+
+
+
+
 
 
 
@@ -121,14 +110,8 @@ def user_rate_lawyer(
 
 
 
-
-
-
-
-
 @user_route.post("/{user_id}/upload/image")
 async def create_upload_file(user_id: int, image: ImageCreate, file: UploadFile = File(...)):
-
     # Get the contents of the uploaded file
     file_content = file.file.read()
 

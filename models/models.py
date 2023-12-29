@@ -14,6 +14,7 @@ class UserModel(Base):
     password = Column(String(255))
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
+    
 
 
     #relationships
@@ -34,7 +35,6 @@ class ImageModel(Base):
 
 class LawyerModel(Base):
     __tablename__ = "lawyers"
-
     id = Column(Integer, primary_key=True, index=True)
     fullname = Column(String(255), index=True)
     email = Column(String(50), unique=True, index=True)
@@ -46,6 +46,7 @@ class LawyerModel(Base):
     gendre = Column(String(10))
     description = Column(String(255))
     rating = Column(Integer , default = 0)
+    is_active = Column(Boolean , default = False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.utcnow)
 
@@ -53,9 +54,6 @@ class LawyerModel(Base):
     #relationships
     evaluations = relationship("EvaluationModel", back_populates = 'lawyer')
     categories = relationship("CategorieModel",secondary = "lawyer_category", back_populates="lawyers")
-
-
-
 
 
 
@@ -84,6 +82,8 @@ class EvaluationModel(Base):
         self.lawyer_id = lawyer_id
 
 
+
+
 class CategorieModel(Base):
     __tablename__ = "categories"
     id = Column(Integer, primary_key=True, index=True)
@@ -95,11 +95,13 @@ class CategorieModel(Base):
 
 
 
+
 class CategorieLawyer(Base):
     __tablename__ = "lawyer_category"
 
     Lawyer_id = Column(Integer, ForeignKey('lawyers.id', ondelete='CASCADE'),primary_key=True)
     category_id = Column(Integer,ForeignKey('categories.id',ondelete="CASCADE"),primary_key=True)
+
 
 
 

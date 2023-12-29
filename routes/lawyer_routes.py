@@ -5,6 +5,10 @@ from controllers.auth_controller import *
 from database import SessionLocal  
 from  models import *
 lawyer_route = APIRouter() 
+from jose import JWTError , jwt
+from dotenv import   dotenv_values
+config = dotenv_values('.env')
+
 
 def get_db():
     db = SessionLocal()
@@ -16,8 +20,8 @@ def get_db():
 
 
 @lawyer_route.get("/lawyers")
-async def get_lawyers(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    lawyers = db.query(LawyerModel).offset(skip).limit(limit).all()
+async def get_all_lawyers( db: Session = Depends(get_db)):
+    lawyers = db.query(LawyerModel).all()
     return lawyers
 
 
@@ -27,8 +31,7 @@ async def get_lawyers(skip: int = 0, limit: int = 10, db: Session = Depends(get_
 @lawyer_route.post('/lawyers/create_account')
 async def create_lawyer_account_route(
     lawyer_data : LawyerCreate,
-    db: Session = Depends(get_db)
-):
+    db: Session = Depends(get_db)):
     existing_lawyer =  db.query(LawyerModel).filter(LawyerModel.email == lawyer_data.email).first()
     if existing_lawyer:
         raise HTTPException(status_code=400, detail="account already exicte ,log in please")
@@ -36,22 +39,38 @@ async def create_lawyer_account_route(
         db,
         lawyer_data
     )
-    return {"message": "lawyer account created succesfully , please log nigga",
+    send_email = await send_lawyer_email_verification(db = db ,lawyer_id =lawyer_account.id)
+    return {"message": "lawyer account created succesfully , verify ur email ",
             "lawyer_account": lawyer_account}
 
 
 
 
 
-@lawyer_route.get("/lawyers/get_by_email")
-async def get_lawyer_par_email(email : str,db: Session = Depends(get_db)):
-    exicting_lawyer = get_lawyer_by_email(db,email=email)
-    if(exicting_lawyer):
-        return {'message': "amchi t3ti ",
-        "lawyer" : exicting_lawyer}
-    else:
-        return{"message":"amchi 9wd mkach wach t7ws"}
 
+@lawyer_route.put("/{lawyer_id}/verify-email/{token}")
+async def verify_lawyer(lawyer_id : int, token :str , db : Session = Depends(get_db)):
+    print(token)
+    lawyer =  db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
+    if not lawyer:
+        raise HTTPException(
+            status_code = 404,
+            detail = "User Not Found"
+        )
+    
+    decoded_token = jwt.decode(token, config['SECRET_KEY'], algorithms=[config['ALGORITHM']])
+    exp_timestamp = decoded_token['expired_in']
+    exp_datetime = datetime.fromtimestamp(exp_timestamp, timezone.utc)
+    if exp_datetime < exp_timestamp :
+        raise HTTPException(
+            status_code = 422,
+            detail = "Token has Expired"
+        )
+    lawyer.is_activated = True
+    db.commit()
+    db.refresh(lawyer)
+
+    return lawyer
 
 
 
@@ -105,10 +124,3 @@ async def get_lawyer_profile(lawyer_id :int ,db :Session = Depends(get_db)):
         "comments" : commentaires
     }
 
-
-@lawyer_route.post("/lawyers/login")
-async def login_for_access_token(user_info: LoginData  , db : Session = Depends(get_db)):
-    access_token = await authenticate_lawyer(user_info.email,user_info.password,db)
-    #response = Response()
-    #response.set_cookie(key="access_token", value=access_token, httponly=True)
-    return {"access token " : access_token }
