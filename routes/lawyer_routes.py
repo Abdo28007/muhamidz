@@ -4,6 +4,9 @@ from controllers.lawyer_controller import *
 from controllers.auth_controller import *
 from database import SessionLocal  
 from  models import *
+
+
+
 lawyer_route = APIRouter() 
 
 def get_db():
@@ -112,3 +115,29 @@ async def login_for_access_token(user_info: LoginData  , db : Session = Depends(
     #response = Response()
     #response.set_cookie(key="access_token", value=access_token, httponly=True)
     return {"access token " : access_token }
+
+
+@lawyer_route.get("/lawyers/search_by_name")
+async def search_lawyer_by_name_route(query: str, db: Session = Depends(get_db)):
+    lawyers = search_lawyer_by_name(db, query)
+    return {"lawyers": lawyers}
+
+@lawyer_route.get("/lawyers/search_by_category")
+async def search_lawyer_by_category_route(category: str, db: Session = Depends(get_db)):
+    lawyers = search_lawyer_by_category(db, category)
+    return {"lawyers": lawyers}
+
+@lawyer_route.get("/lawyers/search_by_city")
+async def search_lawyer_by_city_route(city: str, db: Session = Depends(get_db)):
+    lawyers = search_lawyer_by_city(db, city)
+    return {"lawyers": lawyers}
+
+@lawyer_route.get("/lawyers/search_by_phone_number")
+async def search_lawyer_by_phone_number_route(phone_num: str, db: Session = Depends(get_db)):
+    lawyers = search_lawyer_by_phone_number(db, phone_num)
+    return {"lawyers": lawyers}
+
+@lawyer_route.get("/lawyers/search_by_email")
+async def search_lawyer_by_email_route(email: str, db: Session = Depends(get_db)):
+    lawyers = search_lawyer_by_email(db, email)
+    return {"lawyers": lawyers}

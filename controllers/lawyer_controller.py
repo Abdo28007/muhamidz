@@ -17,15 +17,19 @@ from fastapi.responses import JSONResponse
 LawyerCreateResponse = sqlalchemy_to_pydantic(LawyerModel, exclude=['id','password'])
 
 
-
-
-
 def create_lawyer_account(
     db: Session,
-    lawyer_data : LawyerCreate
+    lawyer_data: LawyerCreate
 ) -> LawyerCreateResponse:
-    # Create a new lawyer instance
+    # Check if the provided email is already in use
+    existing_lawyer = db.query(LawyerModel).filter(LawyerModel.email == lawyer_data.email).first()
+    if existing_lawyer:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    # Hash the password
     hashed_password = hash_password(lawyer_data.password)
+
+    # Create a new lawyer instance
     new_lawyer = LawyerModel(
         fullname=lawyer_data.fullname,
         email=lawyer_data.email,
@@ -35,7 +39,7 @@ def create_lawyer_account(
         address=lawyer_data.address,
         city=lawyer_data.city,
         description=lawyer_data.description,
-        password = hashed_password
+        password=hashed_password
     )
 
     # Add the new lawyer to the database
@@ -43,7 +47,33 @@ def create_lawyer_account(
     db.commit()
     db.refresh(new_lawyer)
 
+    # Now retrieve the lawyer's ID after it has been committed
+    lawyer_id = new_lawyer.id
+    print("HEHEH"+str(lawyer_id))
+
+
+    # Associate categories with the new lawyer
+    for category_name in lawyer_data.categories:
+        # Check if the category already exists
+        category = db.query(CategorieModel).filter(CategorieModel.caegorie_name == category_name).first()
+
+        # If the category doesn't exist, create and add it
+        if not category:
+            category = CategorieModel(caegorie_name=category_name)
+            db.add(category)
+            db.commit()
+            db.refresh(category)
+
+        # Associate the category with the new lawyer using the retrieved lawyer_id
+        lawyer_category = CategorieLawyer(Lawyer_id=lawyer_id, category_id=category.id)
+        db.add(lawyer_category)
+        db.commit()
+        db.refresh(category)
+
     return LawyerCreateResponse.from_orm(new_lawyer)
+
+
+
 
 
 
@@ -132,3 +162,19 @@ def get_all_avis_for_lawyer(db : Session,lawyer_id):
         data['commentaire'] = avi.commentaire
         result.append(data)
     return result
+
+
+def search_lawyer_by_name(db: Session, query: str):
+    return db.query(LawyerModel).filter(LawyerModel.fullname.ilike(f"%{query}%")).all()
+
+def search_lawyer_by_category(db: Session, category: str):
+    return db.query(LawyerModel).filter(LawyerModel.categories.any(CategorieModel.name.ilike(f"%{category}%"))).all()
+
+def search_lawyer_by_city(db: Session, city: str):
+    return db.query(LawyerModel).filter(LawyerModel.city.ilike(f"%{city}%")).all()
+
+def search_lawyer_by_phone_number(db: Session, phone_num: str):
+    return db.query(LawyerModel).filter(LawyerModel.phone_number.ilike(f"%{phone_num}%")).all()
+
+def search_lawyer_by_email(db: Session, email: str):
+    return db.query(LawyerModel).filter(LawyerModel.email.ilike(f"%{email}%")).all()

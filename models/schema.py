@@ -1,5 +1,6 @@
 from pydantic import BaseModel , EmailStr
 
+from typing import List, Optional
 from datetime import datetime
 
 
@@ -20,6 +21,7 @@ class ImageCreate(BaseModel):
 
 
 
+
 class LawyerCreate(BaseModel):
     fullname: str
     email: EmailStr
@@ -30,9 +32,31 @@ class LawyerCreate(BaseModel):
     city: str
     description: str
     password : str
+    categories: List[str]
 
 
 class EvaluationCreate(BaseModel):
     commentaire: str
     rating: int
 
+
+
+
+class LawyerAvailabilityCreate(BaseModel):
+    lawyer_id: int
+    start_time: datetime
+    end_time: datetime
+
+class AvailabilityResponse(BaseModel):
+    message: str
+    data: LawyerAvailabilityCreate
+
+class AppointmentRequest(BaseModel):
+    user_id: int
+    lawyer_id: int
+    time_availability_id:int
+    appointment_time: datetime
+
+class AppointmentResponse(BaseModel):
+    message: str
+    data: AppointmentRequest
