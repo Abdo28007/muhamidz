@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String,DateTime , LargeBinary , ForeignKey , Date , func , Boolean
+from sqlalchemy import Column, Integer, String,DateTime , LargeBinary , ForeignKey , Date , func , Boolean , Float
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from database import Base
@@ -45,7 +45,7 @@ class LawyerModel(Base):
     city = Column(String(255))
     gendre = Column(String(10))
     description = Column(String(255))
-    rating = Column(Integer , default = 0)
+    rating = Column(Float , default = 0)
     is_active = Column(Boolean , default = False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.utcnow)
