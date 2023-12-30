@@ -12,6 +12,18 @@ config = dotenv_values('.env')
 
 
 
+conf = ConnectionConfig(
+            MAIL_USERNAME = config['GMAIL'],
+            MAIL_PASSWORD =  config['GMAIL_SECRET'],
+            MAIL_FROM = config['GMAIL'],
+            MAIL_PORT = 587,
+            MAIL_SERVER = "smtp.gmail.com",
+            MAIL_STARTTLS = True,
+            MAIL_SSL_TLS = False,
+            USE_CREDENTIALS = True,
+            VALIDATE_CERTS = True
+        )
+
 def create_lawyer_account(
     db: Session,
     lawyer_data : LawyerCreate):
@@ -33,7 +45,6 @@ def create_lawyer_account(
     db.add(new_lawyer)
     db.commit()
     db.refresh(new_lawyer)
-
     return new_lawyer
 
 
@@ -50,7 +61,6 @@ async def send_lawyer_email_verification(db : Session, lawyer_id : int):
         config['SECRET_KEY'],
         algorithm=config['ALGORITHM'],
     )
-    print(token)
     link = f"http://localhost:8000/{lawyer_id}/verify-email/{token}"
     html = f"""
             <p>Click here to verify your account </p>
@@ -60,26 +70,17 @@ async def send_lawyer_email_verification(db : Session, lawyer_id : int):
                 </a>
             </center>
         """
-    conf = ConnectionConfig(
-            MAIL_USERNAME = config['GMAIL'],
-            MAIL_PASSWORD =  config['GMAIL_SECRET'],
-            MAIL_FROM = config['GMAIL'],
-            MAIL_PORT = 587,
-            MAIL_SERVER = "smtp.gmail.com",
-            MAIL_STARTTLS = False,
-            MAIL_SSL_TLS = True,
-            USE_CREDENTIALS = True,
-            VALIDATE_CERTS = True
-        )
+
     message = MessageSchema(
             subject="Fastapi-Mail module",
             recipients=[lawyer.email],
             body=html,
             subtype=MessageType.html
             )
-    fm = FastMail(conf)
+    
+    mail =  FastMail(conf)
     try:
-        await fm.send_message(message)
+        await mail.send_message(message)
         return {"message": "Email sent successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")

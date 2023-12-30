@@ -21,6 +21,7 @@ class ImageCreate(BaseModel):
 
 
 
+
 class LawyerCreate(BaseModel):
     fullname: str
     email: EmailStr
@@ -42,3 +43,6 @@ class EvaluationCreate(BaseModel):
 
 class EmailSchema(BaseModel):
     email: List[EmailStr]
+
+class PasswordSchema(BaseModel):
+    password : str

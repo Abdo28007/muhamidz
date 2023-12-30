@@ -8,6 +8,7 @@ lawyer_route = APIRouter()
 from jose import JWTError , jwt
 from dotenv import   dotenv_values
 config = dotenv_values('.env')
+from datetime import datetime , timedelta , timezone
 
 
 def get_db():
@@ -50,18 +51,17 @@ async def create_lawyer_account_route(
 
 @lawyer_route.put("/{lawyer_id}/verify-email/{token}")
 async def verify_lawyer(lawyer_id : int, token :str , db : Session = Depends(get_db)):
-    print(token)
     lawyer =  db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
     if not lawyer:
         raise HTTPException(
             status_code = 404,
             detail = "User Not Found"
         )
-    
-    decoded_token = jwt.decode(token, config['SECRET_KEY'], algorithms=[config['ALGORITHM']])
+   
+    decoded_token = jwt.decode(token, config['SECRET_KEY'], algorithms=["HS256"])
     exp_timestamp = decoded_token['expired_in']
     exp_datetime = datetime.fromtimestamp(exp_timestamp, timezone.utc)
-    if exp_datetime < exp_timestamp :
+    if exp_datetime.timestamp() < exp_timestamp :
         raise HTTPException(
             status_code = 422,
             detail = "Token has Expired"
