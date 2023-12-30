@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String,DateTime , LargeBinary , ForeignK
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from database import Base
+from sqlalchemy import Boolean
 
 
 
@@ -20,6 +21,7 @@ class UserModel(Base):
     #relationships
     image = relationship("ImageModel", back_populates="user")
     evaluations = relationship("EvaluationModel", back_populates = 'user')
+    appointments = relationship("AppointmentModel", back_populates="user")
 
 
 class ImageModel(Base):
@@ -54,7 +56,9 @@ class LawyerModel(Base):
     #relationships
     evaluations = relationship("EvaluationModel", back_populates = 'lawyer')
     categories = relationship("CategorieModel",secondary = "lawyer_category", back_populates="lawyers")
-
+    # relationship with appointments and availability
+    availabilities = relationship("LawyerAvailabilityModel", back_populates="lawyer")
+    appointments = relationship("AppointmentModel", back_populates="lawyer")
 
 
 
@@ -111,6 +115,29 @@ class AppointmentModel(Base):
     id = Column(Integer, primary_key=True, index=True)
     appointment_time = Column(DateTime, nullable=True)
     accepted = Column(Boolean, default=False)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    lawyer_id = Column(Integer, ForeignKey("lawyers.id"), index=True)
+    time_availability_id = Column(Integer, ForeignKey("lawyer_availabilities.id"), index=True)
+
+    # Relationships
+    user = relationship("UserModel", back_populates="appointments")
+    lawyer = relationship("LawyerModel", back_populates="appointments")
+
+
+
+class LawyerAvailabilityModel(Base):
+    __tablename__ = "lawyer_availabilities"
+
+    id = Column(Integer, primary_key=True, index=True)
+    lawyer_id = Column(Integer, ForeignKey("lawyers.id"), index=True)
+    start_time = Column(DateTime, nullable=False)
+    end_time = Column(DateTime, nullable=False)
+    is_available = Column(Boolean, default=True)  # New column to track availability status
+
+    # Relationship
+    lawyer = relationship("LawyerModel", back_populates="availabilities")
+
+    
 
 
 
