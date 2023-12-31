@@ -15,22 +15,17 @@ class UserModel(Base):
     password = Column(String(255))
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
+    image = Column("profile_image", String(1000))
     
 
 
     #relationships
-    image = relationship("ImageModel", back_populates="user")
+
     evaluations = relationship("EvaluationModel", back_populates = 'user')
     appointments = relationship("AppointmentModel", back_populates="user")
 
 
-class ImageModel(Base):
-    __tablename__ = "images"
-    id = Column(Integer, primary_key=True, index=True)
-    filename = Column(String(255), index=True)
-    data = Column(LargeBinary)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    user = relationship("UserModel", back_populates="image")
+
     
 
 
@@ -51,8 +46,11 @@ class LawyerModel(Base):
     is_active = Column(Boolean , default = False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.utcnow)
+    image = Column("profile_image", String(1000))
 
 
+    
+       
     #relationships
     evaluations = relationship("EvaluationModel", back_populates = 'lawyer')
     categories = relationship("CategorieModel",secondary = "lawyer_category", back_populates="lawyers")

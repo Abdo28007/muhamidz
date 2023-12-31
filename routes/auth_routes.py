@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException , Response 
+from fastapi import APIRouter, Depends, HTTPException , Response , File , UploadFile
 from sqlalchemy.orm import Session
 import bcrypt
 from datetime import datetime
@@ -7,9 +7,20 @@ from models import *
 from controllers import *
 from jose import jwt , JWTError
 from dotenv import   dotenv_values
-config = dotenv_values('.env')
+from fastapi.staticfiles import StaticFiles
+import os
+import secrets
+from PIL import Image
+
+
+
 
 auth_route = APIRouter() 
+config = dotenv_values('.env')
+auth_route.mount("/static", StaticFiles(directory= "static"),name="static")
+
+
+
 
 
 
@@ -68,3 +79,34 @@ async def reset_password(password : str , token : str , db :Session=Depends(get_
 async def update_password(user_email : str,resetPassword_info: resetPassword , db : Session = Depends(get_db)):
     updated_password = await change_password(db= db ,user_email = user_email , resetPassword_info= resetPassword_info)
     return updated_password
+
+
+
+
+@auth_route.post("/{user_email}/profile/picture")
+async def create_profile_picture(user_email : str ,file : UploadFile = File(...), db :Session =Depends(get_db)):
+    user = db.query(UserModel).filter(UserModel.email == user_email).first()
+    FILEPATH = "static/users/"
+    if not  user :
+        user= db.query(LawyerModel).filter(LawyerModel.email == user_email).first()
+        FILEPATH = "static/lawyers/"
+    filename = file.filename
+    extention = filename.split(".")
+    extention = extention[-1]
+    if extention not in ["jpeg", "png","jpg","gif"]:
+        raise HTTPException(status_code=400, detail="Unsupported file")
+    token_name = secrets.token_hex(16) + "."+ extention
+    generated_name = FILEPATH + token_name
+    file_content = await file.read()
+    with open(generated_name, "wb+") as file:
+        file.write(file_content)
+    #resize the picture:
+    img = Image.open(generated_name)
+    img = img.resize(size = (200,200))
+    img.save(generated_name)
+    file.close()
+    user.image = token_name
+    db.commit()
+    db.refresh(user)
+    return {"filename": token_name}  
+
