@@ -65,6 +65,6 @@ async def reset_password(password : str , token : str , db :Session=Depends(get_
 
     
 @auth_route.put("/{user_email}/update-password")
-async def update_password(user_email : str,old_password:str , new_password :str , db : Session = Depends(get_db)):
-    updated_password = await change_password(db= db ,user_email = user_email , old_password=old_password , new_password=new_password )
+async def update_password(user_email : str,resetPassword_info: resetPassword , db : Session = Depends(get_db)):
+    updated_password = await change_password(db= db ,user_email = user_email , resetPassword_info= resetPassword_info)
     return updated_password

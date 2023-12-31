@@ -21,6 +21,10 @@ class ImageCreate(BaseModel):
     filename : str
 
 
+class resetPassword(BaseModel):
+    old_password : str
+    new_password : str
+
 
 
 class LawyerCreate(BaseModel):

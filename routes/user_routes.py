@@ -93,9 +93,9 @@ async def user_rate_lawyer(user_id:int,lawyer_id :int,evaluation : EvaluationCre
 
 
 
-@user_route.delete("/user/{appoinement_id}/delete")
-async def delete_rate(appoinement_id : int , db : Session = Depends(get_db)):
-    rate = db.query(EvaluationModel).filter(EvaluationModel.id == appoinement_id).first()
+@user_route.delete("/user/{evaluation_id}/delete")
+async def delete_rate(evaluation_id : int , db : Session = Depends(get_db)):
+    rate = db.query(EvaluationModel).filter(EvaluationModel.id == evaluation_id).first()
     if not rate:
         raise HTTPException(status_code=404, detail="Rate not found")
     

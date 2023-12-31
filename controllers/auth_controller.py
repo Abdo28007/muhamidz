@@ -151,7 +151,7 @@ async def send_email_reset_password(db : Session , email : str):
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-async def change_password(db : Session , user_email : str , old_password : str , new_password  : str):
+async def change_password(db : Session , user_email : str , resetPassword_info : resetPassword):
     user = db.query(UserModel).filter(UserModel.email == user_email).first()
     if not user:
         lawyer = db.query(LawyerModel).filter(LawyerModel.email== user_email).first()
@@ -160,21 +160,21 @@ async def change_password(db : Session , user_email : str , old_password : str ,
             raise HTTPException(
                 status_code = 404,
                 detail = "This Email is Not Registerd")
-        if not bcrypt.checkpw(old_password.encode('utf-8'), lawyer.password.encode('utf-8')):
+        if not bcrypt.checkpw(resetPassword_info.old_password.encode('utf-8'), lawyer.password.encode('utf-8')):
             raise HTTPException(
                 status_code=404,
                 detail ="password do not match try again"
                 )
-        lawyer.password =  hash_password(new_password)
+        lawyer.password =  hash_password(resetPassword_info.new_password)
         db.commit()
         db.refresh(lawyer)
         return {"message":"password changes succesfully"}
-    if not bcrypt.checkpw(old_password.encode('utf-8'), user.password.encode('utf-8')):
+    if not bcrypt.checkpw(resetPassword_info.old_password.encode('utf-8'), user.password.encode('utf-8')):
         raise HTTPException(
             status_code=404,
             detail ="password do not match try again"
             )
-    user.password =  hash_password(new_paswword)
+    user.password =  hash_password(resetPassword_info.new_password)
     db.commit()
     db.refresh(user)
     return {"message":"password changes succesfully"}
