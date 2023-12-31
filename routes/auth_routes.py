@@ -64,3 +64,7 @@ async def reset_password(password : str , token : str , db :Session=Depends(get_
             'data':user}
 
     
+@auth_route.put("/{user_email}/update-password")
+async def update_password(user_email : str,old_password:str , new_password :str , db : Session = Depends(get_db)):
+    updated_password = await change_password(db= db ,user_email = user_email , old_password=old_password , new_password=new_password )
+    return updated_password

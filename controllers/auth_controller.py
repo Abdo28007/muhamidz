@@ -28,14 +28,14 @@ conf = ConnectionConfig(
 
 def hash_password(password: str):
     salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+    hashed_password =  bcrypt.hashpw(password.encode('utf-8'), salt)
     return hashed_password.decode('utf-8')
+
 
 
 async def authenticate(email : str , password : str , db : Session):
     try:
-        expiration_time = str(datetime.utcnow() + timedelta(days=2))
-        
+        expiration_time = datetime.utcnow() + timedelta(days =2)
         lawyer =  db.query(LawyerModel).filter(LawyerModel.email == email).first()
         if not lawyer : 
             user =   db.query(UserModel).filter(UserModel.email == email).first()
@@ -76,33 +76,27 @@ async def authenticate(email : str , password : str , db : Session):
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-
-
-
-
 async def get_current_user(db : Session ,token: str = Depends(authenticate)) :
-    try:
-        
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str = payload.get("user_id")
-        if user_id is None:
+    try: 
+        payload = await jwt.decode(token, config['SECRET_KEY'], algorithms=["HS256"])
+        exp_timestamp = payload['expired_in']
+        exp_datetime = datetime.fromtimestamp(exp_timestamp, timezone.utc)
+        if exp_datetime.timestamp() < exp_timestamp :
             raise HTTPException(
-                status_code = 401 ,
-                detail =' invalid acces token'
-            )
-        is_lawyer = payload.get('is_lawyer')
+                status_code = 422,
+                detail = "Token has Expired"
+                )
+        is_lawyer = payload['is_lawyer']
         if is_lawyer:
-                lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
-                return lawyer
+                user = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
         user = db.query(UserModel).filter(UserModel).first()
         return user
-    except JWTError:
+    except JWTError as e:
         raise HTTPException(
                 status_code = 401 ,
-                detail =' invali acces token'
+                detail =f"invali acces token{str(e)}"
         )
     
-
 
 
 async def send_email_reset_password(db : Session , email : str):
@@ -112,7 +106,7 @@ async def send_email_reset_password(db : Session , email : str):
         lawyer = db.query(LawyerModel).filter(LawyerModel.email == email).first()
         if not lawyer:
             raise UserNotFound("This Email is Not Registerd")
-        token =  jwt.encode(
+        token =  await jwt.encode(
         {
          "user_id" : lawyer.id,
          "is_lawyer" : True,
@@ -123,7 +117,7 @@ async def send_email_reset_password(db : Session , email : str):
         )
         user_mail = lawyer.email
     else :
-        token =  jwt.encode(
+        token =  await jwt.encode(
                 {
                 "user_id" : user.id,
                 "is_lawyer" : False,
@@ -157,7 +151,33 @@ async def send_email_reset_password(db : Session , email : str):
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-
+async def change_password(db : Session , user_email : str , old_password : str , new_password  : str):
+    user = db.query(UserModel).filter(UserModel.email == user_email).first()
+    if not user:
+        lawyer = db.query(LawyerModel).filter(LawyerModel.email== user_email).first()
+        print(lawyer)
+        if not lawyer:
+            raise HTTPException(
+                status_code = 404,
+                detail = "This Email is Not Registerd")
+        if not bcrypt.checkpw(old_password.encode('utf-8'), lawyer.password.encode('utf-8')):
+            raise HTTPException(
+                status_code=404,
+                detail ="password do not match try again"
+                )
+        lawyer.password =  hash_password(new_password)
+        db.commit()
+        db.refresh(lawyer)
+        return {"message":"password changes succesfully"}
+    if not bcrypt.checkpw(old_password.encode('utf-8'), user.password.encode('utf-8')):
+        raise HTTPException(
+            status_code=404,
+            detail ="password do not match try again"
+            )
+    user.password =  hash_password(new_paswword)
+    db.commit()
+    db.refresh(user)
+    return {"message":"password changes succesfully"}
 
 
 

@@ -33,26 +33,37 @@ class LawyerCreate(BaseModel):
     city: str
     description: str
     password : str
-<<<<<<< HEAD
+
     class Config:
         orm_mode = True
         from_orm = True
-=======
     categories: List[str]
->>>>>>> appoint-sys
 
+
+class LawyerUpdate(BaseModel):
+    fullname: str
+    languages: str
+    gendre: str
+    phone_number: str
+    address: str
+    city: str
+    description: str
+    categories: List[str]
+    class Config:
+        orm_mode = True
+        from_orm = True
 
 class EvaluationCreate(BaseModel):
     commentaire: str
     rating: int
 
-<<<<<<< HEAD
+
 class EmailSchema(BaseModel):
     email: List[EmailStr]
 
 class PasswordSchema(BaseModel):
     password : str
-=======
+
 
 
 
@@ -74,4 +85,3 @@ class AppointmentRequest(BaseModel):
 class AppointmentResponse(BaseModel):
     message: str
     data: AppointmentRequest
->>>>>>> appoint-sys

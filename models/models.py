@@ -137,6 +137,7 @@ class LawyerAvailabilityModel(Base):
     # Relationship
     lawyer = relationship("LawyerModel", back_populates="availabilities")
 
+
     
 
 

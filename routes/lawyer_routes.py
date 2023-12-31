@@ -33,17 +33,16 @@ async def get_all_lawyers( db: Session = Depends(get_db)):
 
 
 @lawyer_route.post('/lawyers/create_account')
-async def create_lawyer_account_route(
-    lawyer_data : LawyerCreate,
-    db: Session = Depends(get_db)):
+async def create_lawyer_account_route(lawyer_data : LawyerCreate,db: Session = Depends(get_db)):
     existing_lawyer =  db.query(LawyerModel).filter(LawyerModel.email == lawyer_data.email).first()
     if existing_lawyer:
         raise HTTPException(status_code=400, detail="account already exicte ,log in please")
-    lawyer_account =  create_lawyer_account(
-        db,
-        lawyer_data
-    )
-    send_email = await send_lawyer_email_verification(db = db ,lawyer_id =lawyer_account.id)
+    if not existing_lawyer:
+        user = db.query(UserModel).filter(UserModel.email == lawyer_data.email).first()
+        if user :
+            raise HTTPException(status_code=400, detail="account already exicte ,log in please")
+        lawyer_account =  await create_lawyer_account(db,lawyer_data)
+        send_email = await send_lawyer_email_verification(db = db ,lawyer_id =lawyer_account.id)
     return {"message": "lawyer account created succesfully , verify ur email ",
             "lawyer_account": lawyer_account}
 
@@ -78,10 +77,10 @@ async def verify_lawyer(lawyer_id : int, token :str , db : Session = Depends(get
 
 
 
-@lawyer_route.put("/lawyers/{lawyer_id}/update")
+@lawyer_route.patch("/lawyers/{lawyer_id}/update")
 def update_lawyer_account(
     lawyer_id: int,
-    lawyer_data : LawyerCreate ,
+    lawyer_data : LawyerUpdate ,
     db: Session = Depends(get_db)
     ):
     existing_lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
@@ -100,11 +99,11 @@ def update_lawyer_account(
 
 
 @lawyer_route.delete("/lawyers/{lawyer_id}/delete")
-def delete_lawyer_account(lawyer_id: int, db: Session = Depends(get_db)):
+async def delete_lawyer_account(lawyer_id: int, db: Session = Depends(get_db)):
     existing_lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
     if not existing_lawyer:
         return {"message":"Lawyer not found"}
-    deleted_lawyer = delete_lawyer(db, lawyer_id)
+    deleted_lawyer = await delete_lawyer(db, lawyer_id)
     return {"message": "account deleted succesfully"}
 
 
@@ -127,39 +126,4 @@ async def get_lawyer_profile(lawyer_id :int ,db :Session = Depends(get_db)):
         "comments" : commentaires
     }
 
-<<<<<<< HEAD
-=======
 
-@lawyer_route.post("/lawyers/login")
-async def login_for_access_token(user_info: LoginData  , db : Session = Depends(get_db)):
-    access_token = await authenticate_lawyer(user_info.email,user_info.password,db)
-    #response = Response()
-    #response.set_cookie(key="access_token", value=access_token, httponly=True)
-    return {"access token " : access_token }
-
-
-@lawyer_route.get("/lawyers/search_by_name")
-async def search_lawyer_by_name_route(query: str, db: Session = Depends(get_db)):
-    lawyers = search_lawyer_by_name(db, query)
-    return {"lawyers": lawyers}
-
-@lawyer_route.get("/lawyers/search_by_category")
-async def search_lawyer_by_category_route(category: str, db: Session = Depends(get_db)):
-    lawyers = search_lawyer_by_category(db, category)
-    return {"lawyers": lawyers}
-
-@lawyer_route.get("/lawyers/search_by_city")
-async def search_lawyer_by_city_route(city: str, db: Session = Depends(get_db)):
-    lawyers = search_lawyer_by_city(db, city)
-    return {"lawyers": lawyers}
-
-@lawyer_route.get("/lawyers/search_by_phone_number")
-async def search_lawyer_by_phone_number_route(phone_num: str, db: Session = Depends(get_db)):
-    lawyers = search_lawyer_by_phone_number(db, phone_num)
-    return {"lawyers": lawyers}
-
-@lawyer_route.get("/lawyers/search_by_email")
-async def search_lawyer_by_email_route(email: str, db: Session = Depends(get_db)):
-    lawyers = search_lawyer_by_email(db, email)
-    return {"lawyers": lawyers}
->>>>>>> appoint-sys
