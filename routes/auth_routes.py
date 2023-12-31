@@ -90,6 +90,8 @@ async def create_profile_picture(user_email : str ,file : UploadFile = File(...)
     if not  user :
         user= db.query(LawyerModel).filter(LawyerModel.email == user_email).first()
         FILEPATH = "static/lawyers/"
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
     filename = file.filename
     extention = filename.split(".")
     extention = extention[-1]
