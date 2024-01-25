@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from fastapi_mail import ConnectionConfig , FastMail , MessageSchema ,MessageType
 from dotenv import   dotenv_values
 config = dotenv_values('.env')
-from pydantic_sqlalchemy import sqlalchemy_to_pydantic
+
 import secrets
 from typing import Optional
 
@@ -31,8 +31,6 @@ conf = ConnectionConfig(
         )
 
 
-
-LawyerCreateResponse = sqlalchemy_to_pydantic(LawyerModel, exclude=['id','password'])
 
 
 async def create_lawyer_account( db: Session,lawyer_data: LawyerCreate) :
