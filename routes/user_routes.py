@@ -7,7 +7,10 @@ from models import schema
 from controllers import *
 from dotenv import   dotenv_values
 config = dotenv_values('.env')
-user_route = APIRouter() 
+user_route = APIRouter(
+    prefix = "/user",
+    tags = ['user']
+) 
 @user_route.get("/users")
 async def get_all_users( db: Session = Depends(get_db)):
     users = db.query(UserModel).all()

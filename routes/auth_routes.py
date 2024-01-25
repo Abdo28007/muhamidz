@@ -15,7 +15,10 @@ from PIL import Image
 
 
 
-auth_route = APIRouter() 
+auth_route = APIRouter(
+    prefix = "/auth",
+    tags = ['auth']
+) 
 config = dotenv_values('.env')
 auth_route.mount("/static", StaticFiles(directory= "static"),name="static")
 

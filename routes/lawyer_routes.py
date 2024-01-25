@@ -7,7 +7,10 @@ from  models import *
 
 
 
-lawyer_route = APIRouter() 
+lawyer_route = APIRouter(
+    prefix = "/lawyer",
+    tags = ['lawyer']
+) 
 from jose import JWTError , jwt
 from dotenv import   dotenv_values
 config = dotenv_values('.env')
