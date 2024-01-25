@@ -16,11 +16,7 @@ class UserModel(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
     image = Column("profile_image", String(1000))
-    
-
-
     #relationships
-
     evaluations = relationship("EvaluationModel", back_populates = 'user')
     appointments = relationship("AppointmentModel", back_populates="user")
 
@@ -46,42 +42,29 @@ class LawyerModel(Base):
     is_active = Column(Boolean , default = False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.utcnow)
-    image = Column("profile_image", String(1000))
-
-
-    
-       
+    image = Column("profile_image", String(1000)) 
     #relationships
     evaluations = relationship("EvaluationModel", back_populates = 'lawyer')
     categories = relationship("CategorieModel",secondary = "lawyer_category", back_populates="lawyers")
-    # relationship with appointments and availability
-    availabilities = relationship("LawyerAvailabilityModel", back_populates="lawyer")
     appointments = relationship("AppointmentModel", back_populates="lawyer")
 
 
 
 class EvaluationModel(Base):
     __tablename__ = "evaluations"
-
-    id = Column(Integer, primary_key=True, index=True,autoincrement=True)
+    id = Column(Integer, primary_key=True, index=True)
     commentaire = Column(String(255),default = None)
     rating = Column(Integer,nullable = False)
     user_id = Column(Integer,ForeignKey('users.id'),index=True)
     lawyer_id = Column(Integer,ForeignKey('lawyers.id'))  
-
     publication_date = Column(DateTime , default=func.now())
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, onupdate=func.now())
-
     # Relationships
     user = relationship("UserModel", back_populates = 'evaluations')
     lawyer = relationship("LawyerModel", back_populates = 'evaluations')
 
-    def __init__(self, commentaire, rating, user_id, lawyer_id):
-        self.commentaire = commentaire
-        self.rating = rating
-        self.user_id = user_id
-        self.lawyer_id = lawyer_id
+
 
 
 
@@ -91,7 +74,6 @@ class CategorieModel(Base):
     id = Column(Integer, primary_key=True, index=True)
     caegorie_name = Column(String(255),index=True)
     description = Column(String(255))
-
     #relationships
     lawyers = relationship("LawyerModel",secondary = "lawyer_category", back_populates="categories")
 
@@ -100,43 +82,26 @@ class CategorieModel(Base):
 
 class CategorieLawyer(Base):
     __tablename__ = "lawyer_category"
-
-    Lawyer_id = Column(Integer, ForeignKey('lawyers.id', ondelete='CASCADE'),primary_key=True)
-    category_id = Column(Integer,ForeignKey('categories.id',ondelete="CASCADE"),primary_key=True)
+    Lawyer_id = Column(Integer, ForeignKey('lawyers.id', ondelete='NO ACTION'),primary_key=True)
+    category_id = Column(Integer,ForeignKey('categories.id',ondelete="NO ACTION"),primary_key=True)
 
 
 
 
 class AppointmentModel(Base):
     __tablename__ = 'appointments'
-
-    id = Column(Integer, primary_key=True, index=True)
+    appoinement_id = Column(Integer, primary_key=True, index=True )
     appointment_time = Column(DateTime, nullable=True)
+    description = Column(String(255), nullable = False)
     accepted = Column(Boolean, default=False)
     user_id = Column(Integer, ForeignKey("users.id"), index=True)
     lawyer_id = Column(Integer, ForeignKey("lawyers.id"), index=True)
-    time_availability_id = Column(Integer, ForeignKey("lawyer_availabilities.id"), index=True)
-
     # Relationships
     user = relationship("UserModel", back_populates="appointments")
     lawyer = relationship("LawyerModel", back_populates="appointments")
 
 
 
-class LawyerAvailabilityModel(Base):
-    __tablename__ = "lawyer_availabilities"
-
-    id = Column(Integer, primary_key=True, index=True)
-    lawyer_id = Column(Integer, ForeignKey("lawyers.id"), index=True)
-    start_time = Column(DateTime, nullable=False)
-    end_time = Column(DateTime, nullable=False)
-    is_available = Column(Boolean, default=True)  # New column to track availability status
-
-    # Relationship
-    lawyer = relationship("LawyerModel", back_populates="availabilities")
-
-
-    
 
 
 

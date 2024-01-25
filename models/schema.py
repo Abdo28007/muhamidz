@@ -1,8 +1,6 @@
 from pydantic import BaseModel , EmailStr 
-
 from typing import List, Optional
 from datetime import datetime
-
 from typing import List
 
 class UserCreate(BaseModel):
@@ -10,22 +8,16 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
 
-
-
 class LoginData(BaseModel):
     email : EmailStr
     password :str
 
-
 class ImageCreate(BaseModel):
     filename : str
-
 
 class resetPassword(BaseModel):
     old_password : str
     new_password : str
-
-
 
 class LawyerCreate(BaseModel):
     fullname: str
@@ -37,12 +29,10 @@ class LawyerCreate(BaseModel):
     city: str
     description: str
     password : str
-
     class Config:
         orm_mode = True
         from_orm = True
     categories: List[str]
-
 
 class LawyerUpdate(BaseModel):
     fullname: str
@@ -61,31 +51,18 @@ class EvaluationCreate(BaseModel):
     commentaire: str
     rating: int
 
-
 class EmailSchema(BaseModel):
     email: List[EmailStr]
 
 class PasswordSchema(BaseModel):
     password : str
 
-
-
-
-class LawyerAvailabilityCreate(BaseModel):
-    lawyer_id: int
-    start_time: datetime
-    end_time: datetime
-
-class AvailabilityResponse(BaseModel):
-    message: str
-    data: LawyerAvailabilityCreate
-
 class AppointmentRequest(BaseModel):
-    user_id: int
-    lawyer_id: int
-    time_availability_id:int
+    description : str
     appointment_time: datetime
 
+class RefuseAppoinement(BaseModel):
+    reason : str
 class AppointmentResponse(BaseModel):
     message: str
     data: AppointmentRequest

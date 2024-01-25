@@ -30,8 +30,6 @@ async def get_all_lawyers( db: Session = Depends(get_db)):
 
 
 
-
-
 @lawyer_route.post('/lawyers/create_account')
 async def create_lawyer_account_route(lawyer_data : LawyerCreate,db: Session = Depends(get_db)):
     existing_lawyer =  db.query(LawyerModel).filter(LawyerModel.email == lawyer_data.email).first()
@@ -109,7 +107,56 @@ async def delete_lawyer_account(lawyer_id: int, db: Session = Depends(get_db)):
 
 
 
+@lawyer_route.get("/lawyers/{lawyer_id}/all-appoinement")
+async def get_all_appoinements(lawyer_id :int , db : Session = Depends(get_db)):
+    appoinements = db.query(AppointmentModel).filter(AppointmentModel.lawyer_id == lawyer_id).all()
+    return appoinements
 
+
+
+@lawyer_route.post("/lawyers/{lawyer_id}/all-appoinement/{appoinement_id}/accepte")
+async def accept_appoinement(lawyer_id : int , appoinement_id : int , db : Session = Depends(get_db)):
+    lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
+    if not lawyer:
+        raise HTTPException(status_code=404, detail="lawyer not found")
+    appoinement = db.query(AppointmentModel).filter(AppointmentModel.appoinement_id == appoinement_id).first()
+    if not appoinement:
+        raise HTTPException(status_code=404, detail="appoinement not found")
+    user_id = appoinement.user_id
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="user not found")
+    if appoinement.accepted:
+        raise HTTPException(status_code=400, detail="appoinement already accepted")  
+    appoinement.accepted = True
+    send_email = await send_user_email_notification(db = db ,status = True,lawyer_fullname = lawyer.fullname,address = lawyer.address, time = appoinement.appointment_time ,user_email =user.email)
+    db.commit()
+    db.refresh(appoinement)
+    return {
+        "message": "appoinement accepted",
+        "appoinement": appoinement
+    }
+
+@lawyer_route.post("/lawyers/{lawyer_id}/all-appoinement/{appoinement_id}/refuse")
+async def refuse_appoinement(lawyer_id : int ,appoinement_refuse : RefuseAppoinement, appoinement_id : int , db : Session = Depends(get_db)):
+    lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
+    if not lawyer:
+        raise HTTPException(status_code=404, detail="lawyer not found")
+    appoinement = db.query(AppointmentModel).filter(AppointmentModel.appoinement_id == appoinement_id).first()
+    if not appoinement:
+        raise HTTPException(status_code=404, detail="appoinement not found")
+    user_id = appoinement.user_id
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="user not found")
+    if appoinement.accepted:
+        raise HTTPException(status_code=400, detail="appoinement already accepted")  
+    send_email = await send_user_email_notification(db = db ,status = False,lawyer_fullname = lawyer.fullname,user_email =user.email , reason = appoinement_refuse)
+    db.delete(appoinement)
+    db.commit()
+    return {
+        "message" : "appoinement refused succesfully"
+    }
 
 
 @lawyer_route.get("/lawyer/{lawyer_id}/profile")
@@ -120,7 +167,6 @@ async def get_lawyer_profile(lawyer_id :int ,db :Session = Depends(get_db)):
             status_code=404, detail="Lawyer with this id does not exist."
         )
     commentaires = get_all_avis_for_lawyer(lawyer_id = lawyer_id, db=db)
-
     return {
         "user" : lawyer,
         "comments" : commentaires

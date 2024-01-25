@@ -83,12 +83,12 @@ async def update_password(user_email : str,resetPassword_info: resetPassword , d
 
 
 
-@auth_route.post("/{user_email}/profile/picture")
-async def create_profile_picture(user_email : str ,file : UploadFile = File(...), db :Session =Depends(get_db)):
-    user = db.query(UserModel).filter(UserModel.email == user_email).first()
+@auth_route.post("/{user_id}/profile/picture")
+async def create_profile_picture(user_id : int ,file : UploadFile = File(...), db :Session =Depends(get_db)):
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
     FILEPATH = "static/users/"
     if not  user :
-        user= db.query(LawyerModel).filter(LawyerModel.email == user_email).first()
+        user= db.query(LawyerModel).filter(LawyerModel.id == user_id).first()
         FILEPATH = "static/lawyers/"
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -112,3 +112,40 @@ async def create_profile_picture(user_email : str ,file : UploadFile = File(...)
     db.refresh(user)
     return {"filename": token_name}  
 
+
+@auth_route.patch("/{user_id}/profile/picture/update")
+async def update_profile_picture(user_id : int ,file : UploadFile = File(...), db :Session =Depends(get_db)):
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if user :
+        if not user.image:
+            raise HTTPException(status_code=404, detail="Image not found")
+        FILEPATH = "static/users/"
+        os.remove("static/users/"+user.image)
+    if not  user :
+        user= db.query(LawyerModel).filter(LawyerModel.id == user_id).first()
+        if user :
+            if not user.image:
+                raise HTTPException(status_code=404, detail="Image not found")
+            FILEPATH = "static/lawyers/"
+            os.remove("static/lawyers/"+user.image)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+    filename = file.filename
+    extention = filename.split(".")
+    extention = extention[-1]
+    if extention not in ["jpeg", "png","jpg","gif"]:
+        raise HTTPException(status_code=400, detail="Unsupported file")
+    token_name = secrets.token_hex(16) + "."+ extention
+    generated_name = FILEPATH + token_name
+    file_content = await file.read()
+    with open(generated_name, "wb+") as file:
+        file.write(file_content)
+    #resize the picture:
+    img = Image.open(generated_name)
+    img = img.resize(size = (200,200))
+    img.save(generated_name)
+    file.close()
+    user.image = token_name
+    db.commit()
+    db.refresh(user)
+    return {"filename": token_name}  

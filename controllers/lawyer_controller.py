@@ -10,6 +10,11 @@ from fastapi_mail import ConnectionConfig , FastMail , MessageSchema ,MessageTyp
 from dotenv import   dotenv_values
 config = dotenv_values('.env')
 from pydantic_sqlalchemy import sqlalchemy_to_pydantic
+import secrets
+from typing import Optional
+
+async def generate_unique_id():
+    return f"{secrets.randbelow(10**8):08d}"
 
 
 
@@ -38,8 +43,10 @@ async def create_lawyer_account( db: Session,lawyer_data: LawyerCreate) :
 
     # Hash the password
     hashed_password =  hash_password(lawyer_data.password)
+    _id = await  generate_unique_id()
     # Create a new lawyer instance
     new_lawyer = LawyerModel(
+        id = _id,
         fullname=lawyer_data.fullname,
         email=lawyer_data.email,
         languages=lawyer_data.languages,
@@ -116,8 +123,36 @@ async def send_lawyer_email_verification(db : Session, lawyer_id : int):
 
 
 
+async def send_user_email_notification(db : Session,status : bool,lawyer_fullname : str,user_email : str,appoinement_refuse : Optional[RefuseAppoinement] = None,address :Optional[str] = None,time : Optional[datetime]=None ):
+    if  not status:
+        html = f"""
+            <center>
+                <p>your reservation has been refused with the lawyer {lawyer_fullname}  because of {appoinement_refuse.reason}  please choose anothe time   </p>
+            </center>
+            """
+    else :
+        html = f"""
+            <center>
+                <p>your reservation has been accepted with the lawyer {lawyer_fullname}  in {address} at {time} please dont be late  </p>
+            </center>
+            """
 
- 
+
+    message = MessageSchema(
+            subject="MUHAMI_DZ",
+            recipients=[user_email],
+            body=html,
+            subtype=MessageType.html
+            )
+    
+    mail =  FastMail(conf)
+    try:
+        await mail.send_message(message)
+        return {"message": "Email sent successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
 
 
 def update_lawyer(db: Session, lawyer_id : int,lawyer_data : LawyerUpdate):

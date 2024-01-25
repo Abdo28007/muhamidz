@@ -3,20 +3,16 @@ from sqlalchemy.orm import Session
 import bcrypt
 from datetime import datetime
 from database import get_db 
-from models import *
+from models import schema
 from controllers import *
 from dotenv import   dotenv_values
 config = dotenv_values('.env')
 user_route = APIRouter() 
-
-
-
-
-
 @user_route.get("/users")
 async def get_all_users( db: Session = Depends(get_db)):
     users = db.query(UserModel).all()
     return users
+
 
 
     
@@ -29,8 +25,7 @@ async def create_user_account_route(user_data :UserCreate , db: Session = Depend
         lawyer = db.query(LawyerModel).filter(LawyerModel.email == user_data.email).first()
         if lawyer:
             raise HTTPException(status_code=400, detail="account already exicte log in please")
-        user =  await create_user_account(db, user_data = user_data)
-    
+        user =  await create_user_account(db,user_data = user_data)
     return {"message": "user created succesfully ",
             "user": user}
 
@@ -77,7 +72,7 @@ async def user_rate_lawyer(user_id:int,lawyer_id :int,evaluation : EvaluationCre
             status_code = 404,
             detail = "error user or lawyer does not existe" 
         )
-    rate =await user_rate(db=db,user_id =user_id , lawyer_id=lawyer_id,commentaire = evaluation.commentaire,rating = evaluation.rating)
+    rate = await user_rate(db,user_id ,lawyer_id,commentaire = evaluation.commentaire,rating = evaluation.rating)
     total = await get_lawyer_rating(db, lawyer_id)
     lawyer.rating = total
     db.commit()
@@ -98,17 +93,39 @@ async def delete_rate(evaluation_id : int , db : Session = Depends(get_db)):
     rate = db.query(EvaluationModel).filter(EvaluationModel.id == evaluation_id).first()
     if not rate:
         raise HTTPException(status_code=404, detail="Rate not found")
-    
+    lawyer = db.query(LawyerModel).filter(LawyerModel.id==rate.lawyer_id).first()
+    Lawyer_comments = db.query(EvaluationModel.lawyer_id ==lawyer.id).all()
     db.delete(rate)
     db.commit()
-    total =   await get_lawyer_rating(db, rate.lawyer_id)
-    lawyer = db.query(LawyerModel).filter(LawyerModel.id==rate.lawyer_id).first()
-    lawyer.rating = total
+    if len(Lawyer_comments)> 1:
+        total =   await get_lawyer_rating(db, rate.lawyer_id)
+        lawyer.rating = total
+    else :
+        lawyer.rating = 0
     db.commit()
     db.refresh(lawyer)
     return {
         "message" : "rate deleted succesfully",
         "lawyer" :lawyer
+        
+    }
+
+@user_route.post("/lawyers/{lawyer_id}/profile/request-meet/{user_id}")
+async def request_meet(lawyer_id: int,user_id : int , appointment_data : AppointmentRequest,db: Session = Depends(get_db)):
+    lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
+    if not lawyer:
+        raise HTTPException(
+            status_code=404, detail="Lawyer with this id does not exist."
+        ) 
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=404, detail="User with this id does not exist."
+        )
+    appointment = await request_appoinement(db,user_id , lawyer_id , appointment_data )
+    return {
+        "message": "appointment created succesfully",   
+        "appointment" : appointment
     }
 
 
@@ -120,29 +137,6 @@ async def delete_rate(evaluation_id : int , db : Session = Depends(get_db)):
 
 
 
-@user_route.post("/{user_id}/upload/image")
-async def create_upload_file(user_id: int, image: ImageCreate, file: UploadFile = File(...)):
-    # Get the contents of the uploaded file
-    file_content = file.file.read()
-
-    # Create a new image entry in the database and associate it with the user
-    db = SessionLocal()
-    db_user = db.query(User).filter(User.id == user_id).first()
-    
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    db_image = Image(**image.dict(), data=file_content, user=db_user)
-    db.add(db_image)
-    db.commit()
-    db.refresh(db_image)
-    db.close()
-
-    return {"filename": file.filename, "user_id": user_id}
-
-
-
-
 @user_route.get("/search")
 async def search( key : str , filter : str = "full name",db : Session= Depends(get_db)):
     if filter.lower() == "full name":
@@ -150,9 +144,9 @@ async def search( key : str , filter : str = "full name",db : Session= Depends(g
     elif filter.lower() == "city":
         lawyers = db.query(LawyerModel).filter(LawyerModel.city.ilike(f"%{key}%")).all()
     elif filter.lower() == "category": 
-        categorie_id = db.query(CategorieModel).filter(CategorieModel.categorie_name == key).first()
-        lawyers_id = db.query(CategorieLawyer).filter.filter(CategorieLawyer.category_id).all()
-        lawyers = {}
+        categorie_id = db.query(CategorieModel).filter(CategorieModel.caegorie_name == key).first()
+        lawyers_id = db.query(CategorieLawyer).filter(CategorieLawyer.category_id).all()
+        lawyers = []
         for user in lawyers_id:
             lawyer = db.query(LawyerModel).filter(LawyerModel.id == user.Lawyer_id).first()
             lawyers.append(lawyer)
