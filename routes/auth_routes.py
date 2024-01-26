@@ -19,6 +19,7 @@ auth_route = APIRouter(
     prefix = "/auth",
     tags = ['auth']
 ) 
+
 config = dotenv_values('.env')
 auth_route.mount("/static", StaticFiles(directory= "static"),name="static")
 
@@ -30,10 +31,7 @@ auth_route.mount("/static", StaticFiles(directory= "static"),name="static")
 @auth_route.post("/login")
 async def login(user_info :LoginData , db : Session = Depends(get_db)):
     try:
-
-        print(config['GMAIL'])
         access_token = await authenticate(db =db,email = user_info.email,password = user_info.password )
-        
         return {"access token " : access_token }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
@@ -57,7 +55,7 @@ async def forget_password(email : str , db : Session= Depends(get_db)):
 @auth_route.post('/reset-password-email/{token}')
 async def reset_password(password : str , token : str , db :Session=Depends(get_db)):
     hashed_password = hash_password(password)
-    decoded_token = await jwt.decode(token, config['SECRET_KEY'], algorithms=["HS256"])
+    decoded_token = await jwt.decode(token, "77aae4bc1f13cce97dd4d2888ccafeb1143aff464ab6f3819b57b49b8f0f40e1", algorithms=["HS256"])
     exp_timestamp = decoded_token['expired_in']
     exp_datetime = datetime.fromtimestamp(exp_timestamp, timezone.utc)
     if exp_datetime.timestamp() < exp_timestamp :

@@ -19,9 +19,9 @@ async def generate_unique_id():
 
 
 conf = ConnectionConfig(
-            MAIL_USERNAME = config['GMAIL'],
-            MAIL_PASSWORD =  config['GMAIL_SECRET'],
-            MAIL_FROM = config['GMAIL'],
+            MAIL_USERNAME = "muhamidz52@gmail.com",
+            MAIL_PASSWORD = "frzy iypa dyau btir",
+            MAIL_FROM = "muhamidz52@gmail.com",
             MAIL_PORT = 587,
             MAIL_SERVER = "smtp.gmail.com",
             MAIL_STARTTLS = True,
@@ -88,8 +88,8 @@ async def send_lawyer_email_verification(db : Session, lawyer_id : int):
         {
          "lawyer_id" : lawyer.id,
          "expired_in": expiration_time.timestamp()},
-        config['SECRET_KEY'],
-        algorithm=config['ALGORITHM'],
+        "77aae4bc1f13cce97dd4d2888ccafeb1143aff464ab6f3819b57b49b8f0f40e1",
+        algorithm="256",
     )
     link = f"http://localhost:8000/{lawyer_id}/verify-email/{token}"
     html = f"""

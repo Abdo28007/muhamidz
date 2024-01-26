@@ -13,9 +13,9 @@ from fastapi_mail import ConnectionConfig , FastMail , MessageSchema ,MessageTyp
 
 
 conf = ConnectionConfig(
-            MAIL_USERNAME = config['GMAIL'],
-            MAIL_PASSWORD =  config['GMAIL_SECRET'],
-            MAIL_FROM = config['GMAIL'],
+            MAIL_USERNAME = "muhamidz52@gmail.com",
+            MAIL_PASSWORD = "frzy iypa dyau btir",
+            MAIL_FROM = "muhamidz52@gmail.com",
             MAIL_PORT = 587,
             MAIL_SERVER = "smtp.gmail.com",
             MAIL_STARTTLS = True,
@@ -23,6 +23,7 @@ conf = ConnectionConfig(
             USE_CREDENTIALS = True,
             VALIDATE_CERTS = True
         )
+
 
 
 
@@ -55,8 +56,8 @@ async def authenticate(email : str , password : str , db : Session):
                 "user_name" : user.fullname,
                 "is_lawyer": False,
                 "expired_in": expiration_time.timestamp()},
-            config['SECRET_KEY'],
-            algorithm=config['ALGORITHM'])
+            "77aae4bc1f13cce97dd4d2888ccafeb1143aff464ab6f3819b57b49b8f0f40e1",
+            algorithm="HS256")
             return access_token
         if not bcrypt.checkpw(password.encode('utf-8'), lawyer.password.encode('utf-8')):
             raise HTTPException(
@@ -69,8 +70,8 @@ async def authenticate(email : str , password : str , db : Session):
             "user_name" : lawyer.fullname,
             "is_lawyer" : True,
              "expired_in": expiration_time.timestamp()},
-        config['SECRET_KEY'],
-        algorithm=config['ALGORITHM'])
+        "77aae4bc1f13cce97dd4d2888ccafeb1143aff464ab6f3819b57b49b8f0f40e1",
+        algorithm="HS256")
         return access_token
     except Exception as e :
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
@@ -78,7 +79,7 @@ async def authenticate(email : str , password : str , db : Session):
 
 async def get_current_user(db : Session ,token: str = Depends(authenticate)) :
     try: 
-        payload = await jwt.decode(token, config['SECRET_KEY'], algorithms=["HS256"])
+        payload = await jwt.decode(token, "77aae4bc1f13cce97dd4d2888ccafeb1143aff464ab6f3819b57b49b8f0f40e1", algorithms=["HS256"])
         exp_timestamp = payload['expired_in']
         exp_datetime = datetime.fromtimestamp(exp_timestamp, timezone.utc)
         if exp_datetime.timestamp() < exp_timestamp :
@@ -112,8 +113,8 @@ async def send_email_reset_password(db : Session , email : str):
          "is_lawyer" : True,
          "expired_in": expiration_time.timestamp()},
 
-        config['SECRET_KEY'],
-        algorithm=config['ALGORITHM'],
+        "77aae4bc1f13cce97dd4d2888ccafeb1143aff464ab6f3819b57b49b8f0f40e1",
+        algorithm="HS256",
         )
         user_mail = lawyer.email
     else :
@@ -122,8 +123,8 @@ async def send_email_reset_password(db : Session , email : str):
                 "user_id" : user.id,
                 "is_lawyer" : False,
                 "expired_in": expiration_time.timestamp()},
-                config['SECRET_KEY'],
-                algorithm=config['ALGORITHM'],
+                "77aae4bc1f13cce97dd4d2888ccafeb1143aff464ab6f3819b57b49b8f0f40e1",
+                algorithm="HS256",
                 )
         user_mail = user.email
         
