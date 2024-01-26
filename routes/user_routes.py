@@ -147,8 +147,10 @@ async def search( key : str , filter : str = "full name",db : Session= Depends(g
     elif filter.lower() == "city":
         lawyers = db.query(LawyerModel).filter(LawyerModel.city.ilike(f"%{key}%")).all()
     elif filter.lower() == "category": 
-        categorie_id = db.query(CategorieModel).filter(CategorieModel.caegorie_name == key).first()
-        lawyers_id = db.query(CategorieLawyer).filter(CategorieLawyer.category_id).all()
+        categorie = db.query(CategorieModel).filter(CategorieModel.caegorie_name == key).first()
+        if not categorie:
+            return []
+        lawyers_id = db.query(CategorieLawyer).filter(CategorieLawyer.category_id==categorie.id).all()
         lawyers = []
         for user in lawyers_id:
             lawyer = db.query(LawyerModel).filter(LawyerModel.id == user.Lawyer_id).first()
