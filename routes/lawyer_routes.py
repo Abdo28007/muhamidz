@@ -154,7 +154,7 @@ async def refuse_appoinement(lawyer_id : int ,appoinement_refuse : RefuseAppoine
         raise HTTPException(status_code=404, detail="user not found")
     if appoinement.accepted:
         raise HTTPException(status_code=400, detail="appoinement already accepted")  
-    send_email = await send_user_email_notification(db = db ,status = False,lawyer_fullname = lawyer.fullname,user_email =user.email , reason = appoinement_refuse)
+    send_email = await send_user_email_notification(db = db ,status = False,lawyer_fullname = lawyer.fullname,user_email =user.email , appoinement_refuse = appoinement_refuse)
     db.delete(appoinement)
     db.commit()
     return {
