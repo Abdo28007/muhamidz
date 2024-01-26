@@ -8,10 +8,10 @@ from controllers import *
 from dotenv import   dotenv_values
 config = dotenv_values('.env')
 user_route = APIRouter(
-    prefix = "/user",
+    prefix = "/users",
     tags = ['user']
 ) 
-@user_route.get("/users")
+@user_route.get("/")
 async def get_all_users( db: Session = Depends(get_db)):
     users = db.query(UserModel).all()
     return users
@@ -91,7 +91,7 @@ async def user_rate_lawyer(user_id:int,lawyer_id :int,evaluation : EvaluationCre
 
 
 
-@user_route.delete("/user/{evaluation_id}/delete")
+@user_route.delete("/{evaluation_id}/delete")
 async def delete_rate(evaluation_id : int , db : Session = Depends(get_db)):
     rate = db.query(EvaluationModel).filter(EvaluationModel.id == evaluation_id).first()
     if not rate:

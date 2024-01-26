@@ -8,7 +8,7 @@ from  models import *
 
 
 lawyer_route = APIRouter(
-    prefix = "/lawyer",
+    prefix = "/lawyers",
     tags = ['lawyer']
 ) 
 from jose import  jwt
@@ -26,14 +26,14 @@ def get_db():
 
 
 
-@lawyer_route.get("/lawyers")
+@lawyer_route.get("/")
 async def get_all_lawyers( db: Session = Depends(get_db)):
     lawyers = db.query(LawyerModel).all()
     return lawyers
 
 
 
-@lawyer_route.post('/lawyers/create_account')
+@lawyer_route.post('/create_account')
 async def create_lawyer_account_route(lawyer_data : LawyerCreate,db: Session = Depends(get_db)):
     existing_lawyer =  db.query(LawyerModel).filter(LawyerModel.email == lawyer_data.email).first()
     if existing_lawyer:
@@ -43,8 +43,8 @@ async def create_lawyer_account_route(lawyer_data : LawyerCreate,db: Session = D
         if user :
             raise HTTPException(status_code=400, detail="account already exicte ,log in please")
         lawyer_account =  await create_lawyer_account(db,lawyer_data)
-        send_email = await send_lawyer_email_verification(db = db ,lawyer_id =lawyer_account.id)
-    return {"message": "lawyer account created succesfully , verify ur email ",
+        #send_email = await send_lawyer_email_verification(db = db ,lawyer_id =lawyer_account.id)
+    return {"message": "lawyer account created succesfully Login",
             "lawyer_account": lawyer_account}
 
 
@@ -78,7 +78,7 @@ async def verify_lawyer(lawyer_id : int, token :str , db : Session = Depends(get
 
 
 
-@lawyer_route.patch("/lawyers/{lawyer_id}/update")
+@lawyer_route.patch("/{lawyer_id}/update")
 def update_lawyer_account(
     lawyer_id: int,
     lawyer_data : LawyerUpdate ,
@@ -99,7 +99,7 @@ def update_lawyer_account(
 
 
 
-@lawyer_route.delete("/lawyers/{lawyer_id}/delete")
+@lawyer_route.delete("/{lawyer_id}/delete")
 async def delete_lawyer_account(lawyer_id: int, db: Session = Depends(get_db)):
     existing_lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
     if not existing_lawyer:
@@ -110,14 +110,14 @@ async def delete_lawyer_account(lawyer_id: int, db: Session = Depends(get_db)):
 
 
 
-@lawyer_route.get("/lawyers/{lawyer_id}/all-appoinement")
+@lawyer_route.get("/{lawyer_id}/all-appoinement")
 async def get_all_appoinements(lawyer_id :int , db : Session = Depends(get_db)):
     appoinements = db.query(AppointmentModel).filter(AppointmentModel.lawyer_id == lawyer_id).all()
     return appoinements
 
 
 
-@lawyer_route.post("/lawyers/{lawyer_id}/all-appoinement/{appoinement_id}/accepte")
+@lawyer_route.post("/{lawyer_id}/all-appoinement/{appoinement_id}/accepte")
 async def accept_appoinement(lawyer_id : int , appoinement_id : int , db : Session = Depends(get_db)):
     lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
     if not lawyer:
@@ -140,7 +140,7 @@ async def accept_appoinement(lawyer_id : int , appoinement_id : int , db : Sessi
         "appoinement": appoinement
     }
 
-@lawyer_route.post("/lawyers/{lawyer_id}/all-appoinement/{appoinement_id}/refuse")
+@lawyer_route.post("/{lawyer_id}/all-appoinement/{appoinement_id}/refuse")
 async def refuse_appoinement(lawyer_id : int ,appoinement_refuse : RefuseAppoinement, appoinement_id : int , db : Session = Depends(get_db)):
     lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
     if not lawyer:
@@ -162,7 +162,7 @@ async def refuse_appoinement(lawyer_id : int ,appoinement_refuse : RefuseAppoine
     }
 
 
-@lawyer_route.get("/lawyer/{lawyer_id}/profile")
+@lawyer_route.get("/{lawyer_id}/profile")
 async def get_lawyer_profile(lawyer_id :int ,db :Session = Depends(get_db)):
     lawyer = db.query(LawyerModel).filter(LawyerModel.id == lawyer_id).first()
     if not lawyer:
