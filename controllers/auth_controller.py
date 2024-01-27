@@ -107,7 +107,7 @@ async def send_email_reset_password(db : Session , email : str):
         lawyer = db.query(LawyerModel).filter(LawyerModel.email == email).first()
         if not lawyer:
             raise UserNotFound("This Email is Not Registerd")
-        token =  await jwt.encode(
+        token =   jwt.encode(
         {
          "user_id" : lawyer.id,
          "is_lawyer" : True,
@@ -118,7 +118,7 @@ async def send_email_reset_password(db : Session , email : str):
         )
         user_mail = lawyer.email
     else :
-        token =  await jwt.encode(
+        token =   jwt.encode(
                 {
                 "user_id" : user.id,
                 "is_lawyer" : False,

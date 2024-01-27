@@ -19,6 +19,9 @@ class resetPassword(BaseModel):
     old_password : str
     new_password : str
 
+class PasswordSchema(BaseModel):
+    password : str
+    
 class LawyerCreate(BaseModel):
     fullname: str
     email: EmailStr

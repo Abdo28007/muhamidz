@@ -53,7 +53,7 @@ async def forget_password(email : str , db : Session= Depends(get_db)):
 
 
 @auth_route.post('/reset-password-email/{token}')
-async def reset_password(password : str , token : str , db :Session=Depends(get_db)):
+async def reset_password(password : PasswordSchema , token : str , db :Session=Depends(get_db)):
     hashed_password = hash_password(password)
     decoded_token = await jwt.decode(token, "77aae4bc1f13cce97dd4d2888ccafeb1143aff464ab6f3819b57b49b8f0f40e1", algorithms=["HS256"])
     exp_timestamp = decoded_token['expired_in']
