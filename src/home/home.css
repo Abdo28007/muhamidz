@@ -1,0 +1,304 @@
+.home-pic {
+    width: 100%;
+    height: 363.74px;
+}
+
+.home-pic .home-picc {
+    width: 100%;
+    border-radius: 0px 0px 25px 25px;
+}
+
+.logo {
+    position: absolute;
+    top: 6%;
+    left: 4%;
+}
+
+.Connexion-submit {
+    position: absolute;
+    top: 6%;
+    left: 89%;
+}
+
+.diff {
+    width: 30%;
+    text-align: center;
+    position: relative;
+    left: 37%;
+    top: -190px;
+
+}
+
+.diff h3 {
+    color: #fff;
+    font-size: 23px;
+}
+
+.content {
+    width: 100%;
+    position: relative;
+    top: -49%;
+}
+
+.recherch {
+    display: flex;
+}
+
+.r1 {
+    color: #00447b !important;
+    position: relative;
+    left: 12%;
+    top: -20px;
+    font-size: 21px;
+}
+
+.r2 {
+    font-size: 17px;
+    position: relative;
+    left: 26%;
+    display: flex;
+    width: fit-content;
+}
+
+.r2 .serche-bare {
+    position: relative;
+    left: 20px;
+    top: 4%;
+    width: 150%;
+}
+
+.recherche-submit {
+    position: relative;
+    left: 34%;
+    top: 10%;
+}
+
+#recherche {
+    background-color: #00447b !important;
+}
+
+#Connexion {
+    background-color: #00447b !important;
+}
+
+.content2 {
+    position: relative;
+    top: -62%;
+    height: 400px;
+}
+
+.home-navbar {
+    width: 5%;
+    background-color: black;
+    position: relative;
+    left: 3%;
+    border-radius: 0px 20px 20px 0px;
+
+}
+
+.home-navbar ul li {
+    list-style: none;
+    font-size: 23px;
+    padding: 10px;
+    padding-bottom: 30px;
+    text-decoration: none;
+    color: white;
+}
+
+.home-navbar ul {
+    position: relative;
+    left: -670%;
+    top: 10px;
+}
+
+.khat {
+    width: 50%;
+    height: 3px;
+    background-color: black;
+    position: relative;
+    left: 26%;
+    top: -280px;
+}
+
+.Top-lawyers {
+    width: 90%;
+    height: 400px;
+    position: relative;
+    left: 6%;
+    top: -290px;
+    text-align: center;
+}
+
+.h3-text {
+    font-size: 25px;
+    position: relative;
+    left: 2px;
+    color: #00447b;
+}
+
+.Cards {
+    position: relative;
+    left: 14px;
+    display: inline-block;
+    padding: 60px;
+    padding-top: 10px;
+    text-decoration: none;
+}
+
+#prev {
+    position: relative;
+    top: -160px;
+    left: -65%;
+    width: 22px;
+    height: 47px;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.67);
+    border-radius: 25px;
+}
+
+#next {
+    position: relative;
+    top: -160px;
+    left: 2%;
+    width: 22px;
+    height: 47px;
+    background-color: rgba(0, 0, 0, 0.67);
+    border-radius: 25px;
+}
+
+.khat2 {
+    width: 100%;
+    height: 3px;
+    background-color: black;
+    position: relative;
+}
+
+.about {
+    width: 100%;
+    height: 150%;
+    background-color: #e8e8e8;
+    position: relative;
+    top: -39%;
+}
+
+.abt {
+    display: flex;
+}
+
+.DZ-Mouhami {
+    width: 33%;
+    padding: 10px;
+}
+
+.Offer {
+    width: 50%;
+    position: relative;
+    left: 5%;
+}
+
+.abt h3 {
+    font-size: 22px;
+    color: #00447b;
+    text-align: center;
+}
+
+.Offer span {
+    color: rgb(0, 0, 0);
+    font-size: 18px;
+    margin: 5px;
+    padding-bottom: 10px;
+}
+
+.ul {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.ul .li {
+    list-style: none;
+    margin: 0 15px;
+}
+
+.ul .li a {
+    position: relative;
+    display: block;
+    width: 60px;
+    height: 60px;
+    text-align: center;
+    line-height: 63px;
+    background: #333;
+    border-radius: 50%;
+    font-size: 30px;
+    color: #666;
+    transition: .5s;
+}
+
+.ul .li a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #00447b;
+    transition: .5s;
+    transform: scale(.9);
+    z-index: -1;
+}
+
+.ul .li a:hover::before {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px #00447b;
+}
+
+.ul .li a:hover {
+    color: #00447b;
+    box-shadow: 0 0 5px #00447b;
+    text-shadow: 0 0 5px #00447b;
+}
+
+.contact {
+    position: relative;
+    top: 10px;
+    left: 26%;
+    width: 50%;
+    height: 30%;
+}
+
+.contact h3 {
+    font-size: 22px;
+    color: #00447b;
+    text-align: center;
+}
+
+.khat3 {
+    width: 100%;
+    height: 3px;
+    background-color: black;
+    position: relative;
+    top: -40%;
+}
+
+.Cards>* {
+    transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
+}
+
+.Cards>*:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    background-color: #f8f8f8;
+}
+
+.Cards>*:hover p {
+    color: black;
+}
+
+.aaaaaa {
+    height: 400px;
+}

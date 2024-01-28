@@ -1,0 +1,24 @@
+.lowyerlist {
+    width: 82%;
+    height: fit-content;
+    background-color: #FFFAFA;
+    position: relative;
+    left: 9%;
+    top: -70%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.lowyerlist>* {
+    transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
+}
+
+.lowyerlist>*:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    background-color: #f8f8f8;
+}
+
+.lowyerlist>*:hover p {
+    color: black;
+}

@@ -1,0 +1,68 @@
+/* LoginPage.css */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+  
+  .container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  form {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+  }
+  
+  input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  button {
+    width: 100%;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  link {padding: 10px;}
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Styles for the new buttons */
+  div p {
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+  
+  div link button {
+    width: 48%; /* Adjust the width as needed */
+    background-color: #28a745;
+    margin-right: 4%;
+  }
+  
+  div button:last-child {
+    margin-right: 0;
+  }
+  

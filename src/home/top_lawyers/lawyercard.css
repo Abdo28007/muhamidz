@@ -1,0 +1,26 @@
+.Card {
+    background-color: black;
+    width: 150%;
+    height: 360px;
+    border-radius: 25px;
+}
+
+.l-pic {
+    position: relative;
+    top: 20px;
+    border-radius: 10px;
+    width: 70%;
+    height: 59%;
+}
+
+.l-name {
+    color: white;
+    position: relative;
+    top: 8px;
+}
+
+.l-loc {
+    color: white;
+    position: relative;
+    top: -8px;
+}

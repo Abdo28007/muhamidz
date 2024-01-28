@@ -1,0 +1,187 @@
+.lawyer-profile {
+    height: fit-content;
+}
+
+.image {
+    width: 100%;
+    height: 300px;
+    border-radius: 0px 0px 25px 25px;
+}
+
+.informations {
+    width: 100%;
+    height: 400px;
+    display: flex;
+    justify-content: center;
+}
+
+.pic-rate {
+    width: 30%;
+    height: 400px;
+}
+
+.name-info {
+    width: 30%;
+    height: 400px;
+}
+
+.map-reserve {
+    width: 30%;
+    height: 400px;
+    position: relative;
+    top: 20px;
+}
+
+.l-imggg {
+    border: 3px solid #00447b;
+    position: relative;
+    left: 30%;
+    top: 10%;
+}
+
+.l-rateee {
+    position: relative;
+    top: 20%;
+    left: -3%;
+}
+
+.name-info h2 {
+    color: var(--Black, #423D3D);
+    position: relative;
+    left: -10%;
+}
+
+.name-info h3 {
+    color: #00447b;
+    position: relative;
+    left: -3%;
+}
+
+.Evaluations .h3 {
+    color: #00447b;
+    position: relative;
+    left: 10%;
+    top: 40px;
+    width: 50%;
+}
+
+.name-info p {
+    position: relative;
+    left: 2%;
+    font-size: 15px;
+}
+
+#res {
+    background-color: #00447b !important;
+    position: relative;
+    top: 10px;
+    left: 45px;
+}
+
+.rank-me {
+    position: relative;
+    top: 6%;
+    left: -15px;
+}
+
+#r {
+    position: relative;
+    left: 12px;
+    top: 5PX;
+}
+
+.welcome {
+    position: absolute;
+    text-align: center;
+    color: white;
+    top: 24%;
+    left: 31%;
+}
+
+.comments {
+    width: 100%;
+    height: fit-content;
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.add-com {
+    width: 100%;
+    position: relative;
+    top: 50px;
+}
+
+.Comment-bare {
+    width: 80%;
+    position: relative;
+    left: 5%;
+    top: 15px;
+}
+
+#com-btn {
+    background-color: #00447b !important;
+    position: relative;
+    top: -32px;
+    left: 87%;
+}
+
+body.active-modal {
+    overflow-y: hidden;
+}
+
+.modal,
+.overlay {
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    position: fixed;
+    display: flex;
+    align-items: center;
+}
+
+.overlay {
+    background: rgba(49, 49, 49, 0.8);
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    line-height: 1.4;
+    background: #f1f1f1;
+    padding: 14px 28px;
+    border-radius: 3px;
+    width: 40%;
+    height: 80%;
+}
+
+#rend-text {
+    text-align: center;
+    font-size: 22px;
+    color: #00447b;
+}
+
+.rend-form {
+    text-align: center;
+    height: 450px;
+}
+
+#rend-submit {
+    position: relative;
+    left: 44%;
+}
+
+#dateInput {
+    position: relative;
+    top: -137px;
+    width: 25%;
+    height: 6%;
+    background-color: #f1f1f1;
+    border: #423D3D;
+    color: #423D3D;
+}

@@ -1,0 +1,60 @@
+.l-card {
+    background-color: black;
+    width: 40%;
+    height: 300px;
+    border-radius: 45px;
+    position: relative;
+    left: 8%;
+    top: 20px;
+    margin: 20px;
+    text-decoration: none;
+}
+
+.l-imgg {
+    position: absolute;
+    left: 7%;
+    top: 40px;
+    border-radius: 30px;
+    width: 27%;
+}
+
+.l-namee {
+    position: absolute;
+    left: 45%;
+    top: 30px;
+    color: rgb(194, 149, 66);
+    width: 30%;
+    margin: 0px;
+}
+
+.l-adrr {
+    color: white;
+    position: absolute;
+    left: 40%;
+    top: 95px;
+    width: 30%;
+    margin: 0px;
+}
+
+.l-locc {
+    position: absolute;
+    left: 40%;
+    top: 140px;
+    color: white;
+    width: 30%;
+    margin: 0px;
+}
+
+.l-ratee {
+    position: absolute;
+    left: 43%;
+    top: 200px;
+}
+
+.more {
+    color: aliceblue;
+    position: absolute;
+    left: 43%;
+    top: 250px;
+    width: 30%;
+}
