@@ -34,6 +34,7 @@ def hash_password(password: str):
 
 
 
+
 async def authenticate(email : str , password : str , db : Session):
     try:
         expiration_time = datetime.utcnow() + timedelta(days =2)
@@ -56,8 +57,8 @@ async def authenticate(email : str , password : str , db : Session):
                 "user_name" : user.fullname,
                 "is_lawyer": False,
                 "expired_in": expiration_time.timestamp()},
-            "77aae4bc1f13cce97dd4d2888ccafeb1143aff464ab6f3819b57b49b8f0f40e1",
-            algorithm="HS256")
+            config["SECRET_KEY"],
+            algorithm=config['ALGORITHM'])
             return access_token
         if not bcrypt.checkpw(password.encode('utf-8'), lawyer.password.encode('utf-8')):
             raise HTTPException(
@@ -70,10 +71,11 @@ async def authenticate(email : str , password : str , db : Session):
             "user_name" : lawyer.fullname,
             "is_lawyer" : True,
              "expired_in": expiration_time.timestamp()},
-        "77aae4bc1f13cce97dd4d2888ccafeb1143aff464ab6f3819b57b49b8f0f40e1",
-        algorithm="HS256")
+            config["SECRET_KEY"],
+            algorithm=config['ALGORITHM'])
         return access_token
     except Exception as e :
+        print(e)
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 

@@ -161,3 +161,4 @@ async def search( key : str , filter : str = "full name",db : Session= Depends(g
         lawyers = db.query(LawyerModel).filter(LawyerModel.email.ilike(f"%{key}%")).all()
     return lawyers
     
+

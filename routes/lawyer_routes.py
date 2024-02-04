@@ -5,16 +5,16 @@ from controllers.auth_controller import *
 from database import SessionLocal  
 from  models import *
 
+from jose import  jwt
+from dotenv import   dotenv_values
+config = dotenv_values('.env')
+from datetime import datetime , timedelta , timezone
 
 
 lawyer_route = APIRouter(
     prefix = "/lawyers",
     tags = ['lawyer']
 ) 
-from jose import  jwt
-from dotenv import   dotenv_values
-config = dotenv_values('.env')
-from datetime import datetime , timedelta , timezone
 
 
 def get_db():

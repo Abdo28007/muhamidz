@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException , Response , File , UploadFile
 from sqlalchemy.orm import Session
 import bcrypt
-from datetime import datetime
+from datetime import datetime , timezone
 from database import get_db 
 from models import *
 from controllers import *
@@ -11,17 +11,21 @@ from fastapi.staticfiles import StaticFiles
 import os
 import secrets
 from PIL import Image
-
-
+from starlette.requests import Request
+from starlette.responses import RedirectResponse
+from starlette.middleware.sessions import SessionMiddleware
+from authlib.integrations.starlette_client import OAuth, OAuthError
+from config.config import *
+from fastapi.templating import Jinja2Templates
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 
 auth_route = APIRouter(
-    prefix = "/auth",
     tags = ['auth']
 ) 
 
 config = dotenv_values('.env')
-auth_route.mount("/static", StaticFiles(directory= "static"),name="static")
+auth_route.mount("/static", StaticFiles(directory= "statics"),name="static")
 
 
 
@@ -31,6 +35,7 @@ auth_route.mount("/static", StaticFiles(directory= "static"),name="static")
 @auth_route.post("/login")
 async def login(user_info :LoginData , db : Session = Depends(get_db)):
     try:
+
         access_token = await authenticate(db =db,email = user_info.email,password = user_info.password )
         return {"access token " : access_token }
     except Exception as e:
@@ -54,9 +59,12 @@ async def forget_password(email : str , db : Session= Depends(get_db)):
 
 @auth_route.post('/reset-password-email/{token}')
 async def reset_password(password : PasswordSchema , token : str , db :Session=Depends(get_db)):
-    hashed_password = hash_password(password)
-    decoded_token = await jwt.decode(token, "77aae4bc1f13cce97dd4d2888ccafeb1143aff464ab6f3819b57b49b8f0f40e1", algorithms=["HS256"])
+
+    hashed_password = hash_password(password.password)
+    decoded_token = jwt.decode(token,config["SECRET_KEY"], algorithms=[config["ALGORITHM"]])
+    print(decoded_token)
     exp_timestamp = decoded_token['expired_in']
+    print(exp_timestamp)
     exp_datetime = datetime.fromtimestamp(exp_timestamp, timezone.utc)
     if exp_datetime.timestamp() < exp_timestamp :
         raise HTTPException(
@@ -150,3 +158,79 @@ async def update_profile_picture(user_id : int ,file : UploadFile = File(...), d
     db.commit()
     db.refresh(user)
     return {"filename": token_name}  
+
+
+oauth = OAuth()
+oauth.register(
+    name='google',
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_id=CLIENT_ID,
+    client_secret=CLIENT_SECRET,
+    authorize_params=None,
+    authorize_client=None,
+    authorize_response=None,
+    token_params=None,
+    token_client=None,
+    token_response=None,
+    client_kwargs={
+        'scope': 'email openid profile',
+        'redirect_url': 'http://localhost:8000/auth'
+    }
+)
+
+
+templates = Jinja2Templates(directory="templates")
+
+
+@auth_route.get("/")
+def index(request: Request):
+    user = request.session.get('user')
+    if user:
+        return RedirectResponse('welcome')
+
+    return templates.TemplateResponse(
+        name="home.html",
+        context={"request": request}
+    )
+
+
+@auth_route.get('/welcome')
+def welcome(request: Request):
+    user = request.session.get('user')
+    if not user:
+        return RedirectResponse('/')
+    return templates.TemplateResponse(
+        name='welcome.html',
+        context={'request': request, 'user': user}
+    )
+
+
+@auth_route.get("/login")
+async def google_login(request: Request):
+    url = request.url_for('auth')
+    print(url)
+    return await oauth.google.authorize_redirect(request, url)
+
+
+
+@auth_route.get('/auth')
+async def auth(request: Request):
+    try:
+        token = await oauth.google.authorize_access_token(request)
+
+    except OAuthError as e:
+        return templates.TemplateResponse(
+            name='error.html',
+            context={'request': request, 'error': e.error}
+        )
+    user = token.get('userinfo')
+    if user:
+        request.session['user'] = dict(user)
+    return RedirectResponse('welcome')
+
+
+@auth_route.get('/logout')
+def logout(request: Request):
+    request.session.pop('user')
+    request.session.clear()
+    return RedirectResponse('/')
